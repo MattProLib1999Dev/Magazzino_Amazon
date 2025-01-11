@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amazon", "Amazon.csproj", "{9106C6CD-9F34-488B-BD4E-856C2498676C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DAL", "DAL", "{9A1D4355-CB70-4998-B770-7E01981BB40C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Abstract", "Abstract", "{E57BF858-42E6-4BAB-8E52-68F31E85A309}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9106C6CD-9F34-488B-BD4E-856C2498676C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9106C6CD-9F34-488B-BD4E-856C2498676C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9106C6CD-9F34-488B-BD4E-856C2498676C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9106C6CD-9F34-488B-BD4E-856C2498676C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E57BF858-42E6-4BAB-8E52-68F31E85A309} = {9A1D4355-CB70-4998-B770-7E01981BB40C}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0531BDCD-F311-4CE1-96C3-4EC875EE3DE6}
+	EndGlobalSection
+EndGlobal

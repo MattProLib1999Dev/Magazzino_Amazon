@@ -1,0 +1,52 @@
+
+
+1 F2A Timesheet http://f2a.fincons.com
+2 WaConsole  Console dei batch inps  http://waconsole.inps.it
+3 Gmail  Casella Email google https://gmail.com
+
+
+1 Matteo Liberati mliberati  1234
+2 Roberto Nacchia rnacchia qwer
+
+
+
+
+
+
+1 1 UserName MPROIETTI01   
+1 1 Password pippo
+
+pippo
+1 2 Username RNACCHIA
+1 2 Password pluto
+
+
+
+
+1 F2A timesheet http://f2a.fincons.com
+2 Gmail casella email https://gmail.com
+3 BNL banca http://bnl.it
+
+
+1 Username mproietti
+1 Password pippo
+
+
+2 Email mproietti@gmail.com
+2 Password pluto
+
+
+
+
+3 username mproietti
+3 password pippo
+3 token 12345
+3 telefono 333565767
+
+
+
+
+
+
+
+
