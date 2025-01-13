@@ -1,0 +1,4 @@
+[*.cs]
+
+# CA2201: Non generare tipi di eccezione riservati
+dotnet_diagnostic.CA2201.severity = suggestion

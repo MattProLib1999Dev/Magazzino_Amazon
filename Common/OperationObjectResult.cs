@@ -1,5 +1,6 @@
 
 using System.Diagnostics;
+using Amazon.AccessTokenComponent.Model;
 using Amazon.DAL.Models.Response;
 
 namespace Amazon.Common
@@ -33,9 +34,6 @@ namespace Amazon.Common
         {
             return OperationObjectResult<UserDALResponse>.CreateInternal(OperationObjectResultStatus.Ok, value, message);
         }
-
-
-
 
         public static OperationObjectResult<T> CreateErrorResponse(OperationObjectResultStatus Status, string Message = null)
         {

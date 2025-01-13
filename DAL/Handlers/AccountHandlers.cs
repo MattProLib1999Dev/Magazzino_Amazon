@@ -74,7 +74,7 @@ public class AccountHandlers : IAccountHandler
                 Username = firstUser.Username
             };
 
-           return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponseSingleObj(
+           return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponse(
             new List<UserDALResponse> { userDALResponse }
         );
         }
@@ -89,7 +89,16 @@ public class AccountHandlers : IAccountHandler
         }
     }
 
-    
+    Task<OperationObjectResult<List<UserDALResponse>>> IAccountHandler.GetAllUsers()
+    {
+        throw new NotImplementedException();
+    }
+
+    Task<OperationObjectResult<Amazon.Models.Response.LoginHandlerResponse>> IAccountHandler.Login(LoginHandlerRequest request)
+    {
+        throw new NotImplementedException();
+    }
+
 }
 
 

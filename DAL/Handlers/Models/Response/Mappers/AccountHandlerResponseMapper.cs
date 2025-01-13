@@ -51,6 +51,28 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
             return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponse(result);
         }
 
+        public static List<UserDALResponse> MapFromUserResponseForAccessToken(OperationObjectResult<UserDALResponse> response)
+        {
+            if (response.Status != OperationObjectResultStatus.Ok)
+                return null; 
+
+            var userHandlerResponse = new UserHandlerResponse
+            {
+                IdUser = (int)response.Value.IdUser,
+                Name = response.Value.Name,
+                Surname = response.Value.Surname,
+                Password = response.Value.Password,
+                Users = new List<UserDALResponse> { response.Value }  
+            };
+
+            return userHandlerResponse.Users;  
+        }
+
+
+
+
+
+
 
     }
 

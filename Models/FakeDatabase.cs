@@ -56,22 +56,23 @@ public class FakeDatabase : IAccountDataSource
     {
         return Task.FromResult(OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponse(Users));
     }
-    
+
     public async Task<OperationObjectResult<List<UserDALResponse>>> UserInfo(UserInfoHandlerRequest request)
-{
-    var selectedUser = Users.FirstOrDefault(x => x.IdUser.Equals(request.IdUser));
-    if (selectedUser == null)
-        return OperationObjectResult<List<UserDALResponse>>.CreateErrorResponse(OperationObjectResultStatus.NotFound);
-    
-    // Creazione di una lista contenente il singolo utente
-    var userList = new List<UserDALResponse> { selectedUser };
-    return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponse(userList, "");
-}
-
-
-    public Task<OperationObjectResult<OperationObjectResult<UserDALResponse>>> Login(LoginDALRequest request)
     {
-        throw new NotImplementedException();
+        var selectedUser = Users.FirstOrDefault(x => x.IdUser.Equals(request.IdUser));
+        if (selectedUser == null)
+            return OperationObjectResult<List<UserDALResponse>>.CreateErrorResponse(OperationObjectResultStatus.NotFound);
+
+        // Creazione di una lista contenente il singolo utente
+        var userList = new List<UserDALResponse> { selectedUser };
+        return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponse(userList, "");
     }
 
+    public Task<OperationObjectResult<UserDALResponse>> Login(LoginDALRequest request)
+    {
+        var user = Users.FirstOrDefault(x => x.Username.Equals(request.Username, StringComparison.InvariantCulture) && x.Password.Equals(request.Password, StringComparison.InvariantCulture));
+        if (user == null)
+            return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.NotFound));
+        return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateCorrectResponse(user));
+    }
 }
