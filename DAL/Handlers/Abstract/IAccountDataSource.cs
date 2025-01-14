@@ -8,7 +8,6 @@ namespace Amazon.Appunti.Handlers.Abstract
 	{
 	  public Task<OperationObjectResult<List<UserDALResponse>>> GetAllUsers();
 	  public Task<OperationObjectResult<UserDALResponse>> UserInfo(UserInfoHandlerRequest request);
-	  public Task<OperationObjectResult<UserDALResponse>> Login(LoginDALRequest request);
-
+	  public Task<OperationObjectResult<List<UserDALResponse>>> Login(Task<OperationObjectResult<UserDALResponse>> request);
     }
 }

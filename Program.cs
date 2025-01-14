@@ -1,4 +1,5 @@
 using Amazon;
+using Amazon.AccessTokenComponent;
 using Amazon.Appunti.Handlers.Abstract;
 using Amazon.Handlers;
 using Amazon.Handlers.Abstratc;
@@ -92,6 +93,8 @@ static void AddLogging(ILoggingBuilder logging, ConfigurationManager configurati
 
 static void AddServices(IServiceCollection services)
 {
+    services.AddMemoryCache();
     services.AddSingleton<IAccountDataSource, FakeDatabase>();
     services.AddScoped<IAccountHandler, AccountHandlers>();
+    services.AddScoped<IAccessTokenManager, DummyAccessToken>();
 }

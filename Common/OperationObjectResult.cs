@@ -18,16 +18,22 @@ namespace Amazon.Common
     {
         public OperationObjectResultStatus Status { get; set; }
 
-        public T Value { get; set; }
+        public T ?Value { get; set; }
 
         public string Message { get; set; }
 
-        protected OperationObjectResult() { }
+        public OperationObjectResult() { }
 
         public static OperationObjectResult<List<UserDALResponse>> CreateCorrectResponse(List<UserDALResponse> value, string message = "")
         {
             return OperationObjectResult<List<UserDALResponse>>.CreateInternal(OperationObjectResultStatus.Ok, value, message);
         }
+
+        public static OperationObjectResult<T> CreateCorrectResponseGeneric(T value, string message = "")
+        {
+            return OperationObjectResult<T>.CreateInternal(OperationObjectResultStatus.Ok, value, message);
+        }
+
 
         public static OperationObjectResult<UserDALResponse> CreateCorrectResponseSingleObj(UserDALResponse value, string message)
 

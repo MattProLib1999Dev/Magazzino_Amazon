@@ -1,6 +1,7 @@
+using Amazon.AccessTokenComponent.Model;
 using Amazon.Common;
-using Amazon.DAL.Handlers.Models.Response.Response;
 using Amazon.DAL.Models.Response;
+using Amazon.DAL.Handlers.Models.Response.Response;
 using Amazon.Models.Response;
 
 namespace Amazon.DAL.Handlers.Models.Response.Mappers
@@ -11,7 +12,7 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
         {
             if (users.Status != OperationObjectResultStatus.Ok)
             {
-                // Restituisci un risultato di errore mantenendo il tipo OperationObjectResult
+                // Return error result, keeping the OperationObjectResult type
                 return OperationObjectResult<List<UserDALResponse>>.CreateErrorResponse(users.Status, users.Message);
             }
 
@@ -28,7 +29,6 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
             return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponse(result);
         }
 
-
         public static OperationObjectResult<List<UserDALResponse>> MapFromUserInfoHandlerResponse(OperationObjectResult<UserInfoHandlerResponse> response)
         {
             if (response.Status != OperationObjectResultStatus.Ok)
@@ -44,7 +44,7 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
                     Name = response.Value.Name,
                     Surname = response.Value.Surname,
                     Username = response.Value.Username,
-                    Password = String.Empty 
+                    Password = String.Empty // Assuming Password is an empty string for this case
                 }
             };
 
@@ -54,7 +54,7 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
         public static List<UserDALResponse> MapFromUserResponseForAccessToken(OperationObjectResult<UserDALResponse> response)
         {
             if (response.Status != OperationObjectResultStatus.Ok)
-                return null; 
+                return null;
 
             var userHandlerResponse = new UserHandlerResponse
             {
@@ -62,18 +62,46 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
                 Name = response.Value.Name,
                 Surname = response.Value.Surname,
                 Password = response.Value.Password,
-                Users = new List<UserDALResponse> { response.Value }  
+                Users = new List<UserDALResponse> { response.Value }
             };
 
-            return userHandlerResponse.Users;  
+            return userHandlerResponse.Users;
+        }
+
+        public static OperationObjectResult<List<UserDALResponse>> MapFromAccessTokenEncriptModel(OperationObjectResult<AccessTokenEncriptModel> response)
+        {
+            if (response.Status != OperationObjectResultStatus.Ok)
+                return OperationObjectResult<List<UserDALResponse>>.CreateErrorResponse(response.Status, response.Message);
+
+            var userDALResponseList = new List<UserDALResponse>();
+
+            if (response.Value != null)
+            {
+                var loginHandlerResponse = new Amazon.DAL.Handlers.Models.Response.Response.LoginHandlerResponse
+                {
+                    AccessToken = response.Value.Accesstoken,
+                };
+
+                var userDALResponse = MapToUserDALResponse(loginHandlerResponse);
+                userDALResponseList.Add(userDALResponse);
+            }
+
+            return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponse(userDALResponseList);
         }
 
 
 
-
-
-
+        public static UserDALResponse MapToUserDALResponse(Response.LoginHandlerResponse loginHandlerResponse)
+        {
+            return new UserDALResponse
+            {
+                IdUser = loginHandlerResponse.IdUser,
+                Name = loginHandlerResponse.Name,
+                Surname = loginHandlerResponse.Surname,
+                Username = loginHandlerResponse.Username,
+                Password = loginHandlerResponse.Password ?? string.Empty
+            };
+        }
 
     }
-
 }
