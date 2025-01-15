@@ -35,7 +35,7 @@ namespace Amazon.Handlers.Abstratc
         logger.LogError(ex.Message);
         var users = new List<UserDALResponse>();
 
-        return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponse(users, "Operation succeeded");
+        return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponseSingleObj(users, "Operation succeeded");
       }
     }
 
@@ -53,95 +53,68 @@ namespace Amazon.Handlers.Abstratc
         // Converte il singolo oggetto in una lista
         var usersList = new List<UserDALResponse> { dalResult.Value };
 
-        return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponse(usersList);
+        return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponseGeneric(usersList);
       }
       catch (Exception ex)
       {
         logger.LogError(ex.Message);
 
         var users = new List<UserDALResponse>();
-        return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponse(users, "Operation succeeded");
+        return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponseSingleObj(users, "Operation succeeded");
       }
     }
 
+    public async Task<OperationObjectResult<List<LoginHandlerResponse>>> Login(LoginHandlerRequest request)
+{
+    try
+    {
+        // Mappa la richiesta di login al formato del sistema
+        var mappedRequest = AccountHandlerRequestMapper.MapToLoginRequest(request);
 
+        // Esegui il login con l'accesso al data source
+        var user = await accountDataSource.Login(mappedRequest);
 
+        // Se lo stato della risposta non è OK, restituisci un errore
+        if (user.Status != OperationObjectResultStatus.Ok)
+        {
+            return OperationObjectResult<List<LoginHandlerResponse>>.CreateErrorResponse(user.Status, user.Message);
+        }
 
-    public async Task<OperationObjectResult<LoginHandlerResponse>> Login(LoginHandlerRequest request)
-    {   
-          try
-          {
-              var mappedRequest = AccountHandlerRequestMapper.MapToLoginRequest(request);
+        // Mappa la risposta utente per il token di accesso
+        var userHandlerResponse = AccountHandlerResponseMapper.MapFromUserResponseForAccessToken(user);
 
-              // Esegui il login, che restituisco una lista di utenti
-              var userResult = await accountDataSource.Login(mappedRequest);
+        // Mappa il modello di accesso del token
+        var requestAccessToken = AccessTokenModelMapper.MapToAccessTokenModel(userHandlerResponse);
 
-              // Se la risposta non è OK o non ci sono utenti, restituisco un errore
-              if (userResult.Status != OperationObjectResultStatus.Ok || userResult.Value == null || !userResult.Value.Any())
-              {
-                  return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(userResult.Status, "No users found.");
-              }
+        // Genera il token di accesso
+        var result = await accessTokenManager.GenerateToken(requestAccessToken.Value);
 
-              // Se ci sono utenti, prendi il primo utente (dato che stai cercando un singolo utente)
-              var singleUser = await accountDataSource.Login(mappedRequest);
+        // Se la generazione del token non è andata a buon fine, restituisci un errore
+        if (result.Status != OperationObjectResultStatus.Ok)
+        {
+            return OperationObjectResult<List<LoginHandlerResponse>>.CreateErrorResponse(result.Status, result.Message);
+        }
 
-              var userHandlerResponse = AccountHandlerResponseMapper.MapFromUsersDALResponse(singleUser);  
+        // Mappa il risultato del token crittografato a una risposta da restituire
+        var responseList = new List<LoginHandlerResponse>
+        {
+            new LoginHandlerResponse
+            {
+                AccessToken = result.Value.Accesstoken,
+                IdUser = result.Value.IdUser
+            }
+        };
 
-              var requestAccessToken = AccessTokenModelMapper.MapToAccessTokenModel(userHandlerResponse);
-
-              // Se l'utente non esiste, restituisco un errore
-              if (singleUser == null)
-              {
-                  return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(OperationObjectResultStatus.Error, "User not found.");
-              }  
-
-              // Crea una lista di AccessTokenModel (da passare alla generazione del token)
-               var accessTokenList = new List<AccessTokenModel>();
-
-
-
-              // Ora genera il token per l'accesso
-              var tokenGenerationResult = await accessTokenManager.GenerateToken(accessTokenList);
-
-              // Se il risultato della generazione del token non è valido, restituisci un errore
-              if (tokenGenerationResult == null || tokenGenerationResult.Value == null)
-              {
-                  return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(
-                      OperationObjectResultStatus.Error, 
-                      "Failed to generate access token.");
-              }
-
-              // Mappa il risultato finale (prendi il primo access token criptato)
-              var accessTokenEncriptModel = tokenGenerationResult.Value;
-
-              // Restituisco il risultato mappato
-              tokenGenerationResult.Value.FirstOrDefault();
-
-          }
-          catch (Exception ex)
-          {
-              // Log dell'errore
-              logger.LogError(ex, "An error occurred during the login process.");
-              
-              // Restituisci un errore generico
-              return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(
-                  OperationObjectResultStatus.Error, 
-                  ex.Message);
-          }
-
-          return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(
-            OperationObjectResultStatus.Error, 
-            "error message");
-
-          
+        // Restituisci una risposta corretta con la lista di LoginHandlerResponse
+        return OperationObjectResult<List<LoginHandlerResponse>>.CreateCorrectResponseGeneric(responseList);
+    }
+    catch (Exception ex)
+    {
+        // Log dell'errore e restituzione di una risposta di errore
+        logger.LogError(ex.Message);
+        return OperationObjectResult<List<LoginHandlerResponse>>.CreateErrorResponse(OperationObjectResultStatus.Error, ex.Message);
+    }
 }
-
-
-
-
-
-
-
 
   }
 }

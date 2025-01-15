@@ -22,25 +22,24 @@ namespace Amazon.Common
         private OperationObjectResult() { }
 
         // Metodo generico per risposte corrette
-        public static OperationObjectResult<T> CreateCorrectResponseGeneric(
-            T value,
-            string message = "")
+        public static OperationObjectResult<T> CreateCorrectResponseGeneric(T value)
+    {
+        return new OperationObjectResult<T>
         {
-            return CreateInternal(OperationObjectResultStatus.Ok, value, message);
-        }
+            Status = OperationObjectResultStatus.Ok,
+            Value = value,
+            Message = string.Empty
+        };
+    }
 
         // Metodo specifico per un singolo oggetto UserDALResponse
-        public static OperationObjectResult<T> CreateCorrectResponseSingleObj(
-            T value,
-            string message)
+        public static OperationObjectResult<T> CreateCorrectResponseSingleObj(T value,string message)
         {
             return CreateInternal(OperationObjectResultStatus.Ok, value, message);
         }
 
         // Metodo per errori generici
-        public static OperationObjectResult<T> CreateErrorResponse(
-            OperationObjectResultStatus status,
-            string message = "An error occurred.")
+        public static OperationObjectResult<T> CreateErrorResponse(OperationObjectResultStatus status,string message = "An error occurred.")
         {
             var fakeValue = default(T);
             return CreateInternal(status, fakeValue, message);
@@ -73,5 +72,6 @@ namespace Amazon.Common
                 Status = status
             };
         }
+
     }
 }

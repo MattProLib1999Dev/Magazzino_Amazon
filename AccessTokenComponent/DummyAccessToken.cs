@@ -56,8 +56,6 @@ namespace Amazon.AccessTokenComponent
             return Task.FromResult(OperationObjectResult<AccessTokenModel>.CreateErrorResponse(OperationObjectResultStatus.NotFound));
         }
 
-
-
         
     }
 }

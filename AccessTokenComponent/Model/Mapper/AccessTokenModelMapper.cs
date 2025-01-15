@@ -2,7 +2,7 @@ using Amazon.AccessTokenComponent.Model;
 using Amazon.Common;
 using Amazon.DAL.Handlers.Models.Response.Response;
 using Amazon.DAL.Models.Response;
-using Amazon.Models.Request; // Assumo che UserDALResponse sia definito qui
+using Amazon.Models.Response;
 
 public static class AccessTokenModelMapper
 {
@@ -13,62 +13,95 @@ public static class AccessTokenModelMapper
             return OperationObjectResult<List<UserDALResponse>>.CreateErrorResponse(response.Status, response.Message);
         }
 
-        // Mappa ogni AccessTokenModel a UserDALResponse
         var userDALResponses = response.Value.Select(accessToken => new UserDALResponse
         {
             IdUser = accessToken.IdUser,
             Username = accessToken.UserName
         }).ToList();
 
-        return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponse(userDALResponses);
+        return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponseGeneric(userDALResponses);
     }
 
-    public static Task<OperationObjectResult<UserDALResponse>> MapToLoginRequest(LoginHandlerRequest request)
+    public static OperationObjectResult<AccessTokenModel> MapToAccessTokenModel(OperationObjectResult<UserHandlerResponse> response)
+{
+    // Controlla se la risposta ha esito positivo (Ok)
+    if (response.Status != OperationObjectResultStatus.Ok)
     {
-        var accessTokenEncryptModels = new List<UserDALResponse>
-        {
-            new UserDALResponse
-            {
-                Username = request.Username,
-                Password = request.Password
-            }
-        };
-
-        var result = new OperationObjectResult<UserDALResponse>
-        {
-            Status = OperationObjectResultStatus.Ok,  
-            Value = accessTokenEncryptModels.FirstOrDefault()
-        };
-
-        return Task.FromResult(result);
+        // Se la risposta non è Ok, restituisci un errore
+        return OperationObjectResult<AccessTokenModel>.CreateErrorResponse(response.Status, response.Message);
     }
 
-    public static OperationObjectResult<List<UserDALResponse>> MapToAccessTokenModel(OperationObjectResult<List<UserDALResponse>> response)
+    // Mappa la risposta da UserHandlerResponse a AccessTokenModel
+    var accessTokenModel = new AccessTokenModel
+    {
+        IdUser = response.Value.IdUser,
+        UserName = response.Value.Username
+    };
+
+    // Restituisci la risposta con l'AccessTokenModel mappato
+    return OperationObjectResult<AccessTokenModel>.CreateCorrectResponseGeneric(accessTokenModel);
+}
+
+
+    public static OperationObjectResult<UserDALResponse> MapToAccessTokenModelSingleObj(OperationObjectResult<UserDALResponse> response)
     {
         if (response.Status != OperationObjectResultStatus.Ok)
         {
-            return OperationObjectResult<List<UserDALResponse>>.CreateErrorResponse(response.Status, response.Message);
+            return OperationObjectResult<UserDALResponse>.CreateErrorResponse(response.Status, response.Message);
         }
 
-        UserDALResponse userDALResponse = new UserDALResponse();
-        long IdUser = userDALResponse.IdUser;
-        string UserName = userDALResponse.Username;
-
-        var userDALResponseList = new List<UserDALResponse>
+        // Creazione di un singolo oggetto UserDALResponse
+        var userDALResponse = new UserDALResponse
         {
-            new UserDALResponse
-            {
-                IdUser = IdUser,
-                Username = UserName
-            }
+            IdUser = response.Value.IdUser,
+            Name = response.Value.Name,
+            Surname = response.Value.Surname,
+            Password = response.Value.Password,
+            ErrorMessage = response.Value.ErrorMessage,
+            ErrorCode = response.Value.ErrorCode
         };
-        return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponseGeneric(userDALResponseList);
+
+        // Restituisci un oggetto OperationObjectResult<UserDALResponse> con il valore appena creato
+        return OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(userDALResponse);
     }
 
 
 
+    public static OperationObjectResult<List<UserHandlerResponse>> MapFromUsersDalResponse(OperationObjectResult<UserDALResponse> response)
+    {
+        if (response.Status != OperationObjectResultStatus.Ok)
+            return OperationObjectResult<List<UserHandlerResponse>>.CreateErrorResponse(response.Status, response.Message);
 
-    
+        var userHandlerResponseList = new List<UserHandlerResponse>
+        {
+            new UserHandlerResponse
+            {
+                IdUser = response.Value.IdUser,
+                Name = response.Value.Name,
+                Surname = response.Value.Surname,
+                Username = response.Value.Username,
+                Password = response.Value.Password
+            }
+        };
+
+        return OperationObjectResult<List<UserHandlerResponse>>.CreateCorrectResponseGeneric(userHandlerResponseList);
+    }
+
+    public static OperationObjectResult<UserHandlerResponse> MapFromUsersResponseForAccessToken(OperationObjectResult<UserDALResponse> response)
+    {
+        if (response.Status != OperationObjectResultStatus.Ok)
+            return OperationObjectResult<UserHandlerResponse>.CreateErrorResponse(response.Status, response.Message);
+        return OperationObjectResult<UserHandlerResponse>.CreateCorrectResponseGeneric(new UserHandlerResponse
+        {
+            IdUser = response.Value.IdUser,
+            Name = response.Value.Name,
+            Surname = response.Value.Surname,
+            Username = response.Value.Username,
+            Password = response.Value.Password
+        });
+
+    }
+
 }
 
 
