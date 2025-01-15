@@ -58,54 +58,51 @@ public class FakeDatabase : IAccountDataSource
     }
 
     public async Task<OperationObjectResult<UserDALResponse>> UserInfo(UserInfoHandlerRequest request)
+{
+    var selectedUser = Users.FirstOrDefault(x => x.IdUser == request.IdUser);
+
+    if (selectedUser == null)
     {
-        var selectedUser = Users.FirstOrDefault(x => x.IdUser == request.IdUser);
-
-        if (selectedUser == null)
-        {
-            return OperationObjectResult<UserDALResponse>.CreateErrorResponse(
-                OperationObjectResultStatus.Error,
-                "User not found."
-            );
-        }
-
-    
-        var userResponse = new UserDALResponse
-        {
-            IdUser = selectedUser.IdUser,
-            Name = selectedUser.Name,
-            Surname = selectedUser.Surname,
-            Username = selectedUser.Username,
-            Password = selectedUser.Password
-        };
-
-    
-        return OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(
-            userResponse,
-            "User found successfully."
+        return OperationObjectResult<UserDALResponse>.CreateErrorResponse(
+            OperationObjectResultStatus.Error,
+            "User not found."
         );
     }
 
+    var userResponse = await Task.Run(() => new UserDALResponse
+    {
+        IdUser = selectedUser.IdUser,
+        Name = selectedUser.Name,
+        Surname = selectedUser.Surname,
+        Username = selectedUser.Username,
+        Password = selectedUser.Password
+    });
+
+    return OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(userResponse);
+}
+
+
+
 
     public Task<OperationObjectResult<UserDALResponse>> Login(LoginDALRequest request)
-{
-    var user = Users.FirstOrDefault(x =>
-        x.Username.Equals(request.Username, StringComparison.InvariantCultureIgnoreCase) &&
-        x.Password.Equals(request.Password));
-
-    if (user == null)
     {
-        return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(
-            OperationObjectResultStatus.Error,
-            "Invalid username or password."
+        var user = Users.FirstOrDefault(x =>
+            x.Username.Equals(request.Username, StringComparison.InvariantCultureIgnoreCase) &&
+            x.Password.Equals(request.Password));
+
+        if (user == null)
+        {
+            return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(
+                OperationObjectResultStatus.Error,
+                "Invalid username or password."
+            ));
+        }
+
+        return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(
+            user,
+            "Login successful."
         ));
     }
-
-    return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(
-        user,
-        "Login successful."
-    ));
-}
 
 
     

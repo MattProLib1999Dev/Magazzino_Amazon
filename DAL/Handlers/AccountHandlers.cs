@@ -54,17 +54,16 @@ public class AccountHandlers : IAccountHandler
 
             var user = await accountDataSource.UserInfo(mappedRequest);
 
-            if (user.Status != OperationObjectResultStatus.Ok || user.Value == null || !user.Value.Any())
+            if (user.Status != OperationObjectResultStatus.Ok || user.Value == null)
             {
                 logger.LogError("Nessun utente trovato o errore nella risposta.");
                 return OperationObjectResult<List<UserDALResponse>>.CreateErrorResponse(
                     OperationObjectResultStatus.NotFound,
                     "No user found."
                 );
-
             }
 
-            var firstUser = user.Value.First();
+            var firstUser = user.Value; // Assuming user.Value is a collection
 
             var userDALResponse = new UserDALResponse
             {
@@ -74,9 +73,9 @@ public class AccountHandlers : IAccountHandler
                 Username = firstUser.Username
             };
 
-           return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponse(
-            new List<UserDALResponse> { userDALResponse }
-        );
+            return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponseGeneric(
+                new List<UserDALResponse> { userDALResponse }
+            );
         }
         catch (Exception ex)
         {
@@ -87,7 +86,8 @@ public class AccountHandlers : IAccountHandler
                 "An unexpected error occurred while retrieving user information."
             );
         }
-    }
+}
+
 
     Task<OperationObjectResult<List<UserDALResponse>>> IAccountHandler.GetAllUsers()
     {
