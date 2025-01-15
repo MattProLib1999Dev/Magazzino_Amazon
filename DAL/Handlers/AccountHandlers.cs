@@ -11,12 +11,13 @@ public class AccountHandlers : IAccountHandler
 {
     private readonly ILogger<AccountHandlers> logger;
     private readonly IAccountDataSource accountDataSource;
-    private readonly IAccountHandler _accountHandler;
+    private readonly IAccountHandler accountHandler;
 
-    public AccountHandlers(IAccountDataSource inputAccountDataSource, ILogger<AccountHandlers> inputLogger)
+    public AccountHandlers(IAccountDataSource inputAccountDataSource, ILogger<AccountHandlers> inputLogger, IAccountHandler _accountHandler)
     {
         accountDataSource = inputAccountDataSource;
         logger = inputLogger;
+        accountHandler = _accountHandler;
     }
 
     public async Task<List<UserDALResponse>> GetAllUsers()
@@ -41,7 +42,7 @@ public class AccountHandlers : IAccountHandler
         }
     }
 
-    public Task<OperationObjectResult<LoginHandlerResponse>> Login(LoginHandlerRequest request)
+    public Task<OperationObjectResult<Amazon.Models.Response.LoginHandlerResponse>> Login(LoginHandlerRequest request)
     {
         throw new NotImplementedException();
     }
@@ -63,7 +64,7 @@ public class AccountHandlers : IAccountHandler
                 );
             }
 
-            var firstUser = user.Value; // Assuming user.Value is a collection
+            var firstUser = user.Value; 
 
             var userDALResponse = new UserDALResponse
             {
@@ -88,17 +89,7 @@ public class AccountHandlers : IAccountHandler
         }
 }
 
-
-    Task<OperationObjectResult<List<UserDALResponse>>> IAccountHandler.GetAllUsers()
-    {
-        throw new NotImplementedException();
-    }
-
-    Task<OperationObjectResult<Amazon.Models.Response.LoginHandlerResponse>> IAccountHandler.Login(LoginHandlerRequest request)
-    {
-        throw new NotImplementedException();
-    }
-
+    
 }
 
 

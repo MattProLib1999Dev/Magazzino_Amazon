@@ -8,7 +8,7 @@ namespace Amazon.Appunti.Handlers.Abstract
 {
   public interface IAccountHandler
   {
-    public Task<OperationObjectResult<List<UserDALResponse>>> GetAllUsers();
+    public Task<List<UserDALResponse>> GetAllUsers();
     public Task<OperationObjectResult<List<UserDALResponse>>> UserInfo(UserInfoHandlerRequest request);
     public Task<OperationObjectResult<LoginHandlerResponse>> Login(LoginHandlerRequest request);
 
