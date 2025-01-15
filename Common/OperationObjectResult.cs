@@ -1,7 +1,6 @@
-
-using System.Diagnostics;
-using Amazon.AccessTokenComponent.Model;
-using Amazon.DAL.Models.Response;
+using Microsoft.AspNetCore.Http; // Per StatusCodes
+using Amazon.DAL.Models.Response; // Presunta dipendenza
+using System;
 
 namespace Amazon.Common
 {
@@ -12,48 +11,66 @@ namespace Amazon.Common
         NotFound = StatusCodes.Status404NotFound,
         Conflict = StatusCodes.Status409Conflict,
         Error = StatusCodes.Status500InternalServerError
-
     }
+
     public class OperationObjectResult<T>
     {
         public OperationObjectResultStatus Status { get; set; }
+        public required T Value { get; set; }
+        public string Message { get; set; } = string.Empty;
 
-        public T ?Value { get; set; }
+        private OperationObjectResult() { }
 
-        public string Message { get; set; }
-
-        public OperationObjectResult() { }
-
-        public static OperationObjectResult<List<UserDALResponse>> CreateCorrectResponse(List<UserDALResponse> value, string message = "")
+        // Metodo generico per risposte corrette
+        public static OperationObjectResult<T> CreateCorrectResponseGeneric(
+            T value,
+            string message = "")
         {
-            return OperationObjectResult<List<UserDALResponse>>.CreateInternal(OperationObjectResultStatus.Ok, value, message);
+            return CreateInternal(OperationObjectResultStatus.Ok, value, message);
         }
 
-        public static OperationObjectResult<T> CreateCorrectResponseGeneric(T value, string message = "")
+        // Metodo specifico per un singolo oggetto UserDALResponse
+        public static OperationObjectResult<T> CreateCorrectResponseSingleObj(
+            T value,
+            string message)
         {
-            return OperationObjectResult<T>.CreateInternal(OperationObjectResultStatus.Ok, value, message);
+            return CreateInternal(OperationObjectResultStatus.Ok, value, message);
         }
 
-
-        public static OperationObjectResult<UserDALResponse> CreateCorrectResponseSingleObj(UserDALResponse value, string message)
-
-        {
-            return OperationObjectResult<UserDALResponse>.CreateInternal(OperationObjectResultStatus.Ok, value, message);
-        }
-
-        public static OperationObjectResult<T> CreateErrorResponse(OperationObjectResultStatus Status, string Message = null)
+        // Metodo per errori generici
+        public static OperationObjectResult<T> CreateErrorResponse(
+            OperationObjectResultStatus status,
+            string message = "An error occurred.")
         {
             var fakeValue = default(T);
-            return OperationObjectResult<T>.CreateInternal(Status, fakeValue, Message);
+            return CreateInternal(status, fakeValue, message);
         }
 
-        private static OperationObjectResult<T> CreateInternal(OperationObjectResultStatus Status, T Value, string Message)
+        // Metodo per risposte "not found"
+        public static OperationObjectResult<T> CreateNotFoundResponse(string entityName = "Entity")
         {
+            return CreateErrorResponse(OperationObjectResultStatus.NotFound, $"{entityName} not found.");
+        }
+
+        // Metodo interno per creare una risposta
+        private static OperationObjectResult<T> CreateInternal(
+            OperationObjectResultStatus status,
+            T? value,
+            string message)
+        {
+            if (status == OperationObjectResultStatus.Ok && value == null)
+            {
+                throw new ArgumentException(
+                    "Success response must include a value.",
+                    nameof(value)
+                );
+            }
+
             return new OperationObjectResult<T>
             {
-                Value = Value,
-                Message = Message,
-                Status = Status
+                Value = value,
+                Message = message,
+                Status = status
             };
         }
     }
