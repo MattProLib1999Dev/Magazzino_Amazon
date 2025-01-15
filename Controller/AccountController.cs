@@ -76,7 +76,31 @@ public class AccountController : ControllerBase
             });
         }
     }
+
+
+
+
+    [HttpPost("Login")]
+public async Task<IActionResult> Login([FromBody] request )
+{
+    try
+    {
+        var maopedRequest = AccountRequestMapper.MapToLoginRequest(request);
+        var loginResponse = await _accountHandler.Login(mappedRequest);
+        var response = AccountResponseMapper.MapFromUserInfoHandlerResponse(loginResponse);
+
+        if (response.Status == Common.OperationObjectResultStatus.Ok)
+            return ok(response.Value);
+        return StatusCode((int) response.Status);    
+    }
+    catch (System.Exception)
+    {
+        logger.LogError(ex.Message)
+        return StatusCode(500);
+    }
 }
+}
+
 public class ErrorResponse
 {
     public string ErrorMessage { get; set; } = String.Empty;

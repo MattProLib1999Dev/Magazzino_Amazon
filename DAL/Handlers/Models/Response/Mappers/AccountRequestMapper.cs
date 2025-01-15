@@ -21,6 +21,17 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
             };
         }
 
+        public static LoginHandlerRequest MapToLoginRequest(loginModelRequest request)
+        {
+            return new LoginHandlerRequest
+            {
+                Username = request.Username,
+                Password = request.Password
+            }
+        }
+
+        
+
     }
 
 
