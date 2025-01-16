@@ -56,6 +56,9 @@ namespace Amazon.AccessTokenComponent
             return Task.FromResult(OperationObjectResult<AccessTokenModel>.CreateErrorResponse(OperationObjectResultStatus.NotFound));
         }
 
-        
+        Task<OperationObjectResult<AccessTokenEncriptModel>> IAccessTokenManager.GenerateToken(AccessTokenModel input)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,4 +1,5 @@
 using Amazon.DAL.Handlers.Models.Request;
+using Amazon.Models.Request;
 using Amazon.Models.Response;
 
 namespace Amazon.DAL.Handlers.Models.Response.Mappers
@@ -21,13 +22,13 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
             };
         }
 
-        public static LoginHandlerRequest MapToLoginRequest(loginModelRequest request)
+        public static LoginHandlerRequest MapToLoginRequest(LoginHandlerRequest request)
         {
             return new LoginHandlerRequest
             {
                 Username = request.Username,
                 Password = request.Password
-            }
+            };
         }
 
         

@@ -98,7 +98,7 @@ public class FakeDatabase : IAccountDataSource
             ));
         }
 
-        return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(
+        return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateCorrectResponseSingleObj(
             user,
             "Login successful."
         ));

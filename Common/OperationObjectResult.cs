@@ -1,7 +1,3 @@
-using Microsoft.AspNetCore.Http; // Per StatusCodes
-using Amazon.DAL.Models.Response; // Presunta dipendenza
-using System;
-
 namespace Amazon.Common
 {
     public enum OperationObjectResultStatus
@@ -19,7 +15,7 @@ namespace Amazon.Common
         public required T Value { get; set; }
         public string Message { get; set; } = string.Empty;
 
-        private OperationObjectResult() { }
+        public OperationObjectResult() { }
 
         // Metodo generico per risposte corrette
         public static OperationObjectResult<T> CreateCorrectResponseGeneric(T value)

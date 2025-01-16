@@ -1,6 +1,9 @@
 using Amazon.Appunti.Handlers.Abstract;
+using Amazon.Common;
 using Amazon.DAL.Handlers.Models.Request;
 using Amazon.DAL.Handlers.Models.Response.Mappers;
+using Amazon.DAL.Handlers.Models.Response.Response;
+using Amazon.Models.Request;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Amazon;
@@ -53,7 +56,7 @@ public class AccountController : ControllerBase
         {
             var mappedRequest = AccountRequestMapper.MapToUserInfoRequest(request);
             var userHandler = await _accountHandler.UserInfo(mappedRequest);
-            var user = AccountHandlerResponseMapper.MapFromUserInfoHandlerResponse(userHandler);
+            var user = AccountHandlerResponseMapper.MapFromUsersDALResponse(userHandler);
 
             if (user == null)
             {
@@ -81,25 +84,25 @@ public class AccountController : ControllerBase
 
 
     [HttpPost("Login")]
-public async Task<IActionResult> Login([FromBody] request )
-{
-    try
+    public async Task<IActionResult> Login([FromBody] LoginHandlerRequest request)
     {
-        var maopedRequest = AccountRequestMapper.MapToLoginRequest(request);
-        var loginResponse = await _accountHandler.Login(mappedRequest);
-        var response = AccountResponseMapper.MapFromUserInfoHandlerResponse(loginResponse);
+        try
+        {
+            var mappedRequest = AccountRequestMapper.MapToLoginRequest(request);
+            var loginResponse = await _accountHandler.Login(mappedRequest);
+            var response = AccountResponseMapper.MapFromLoginHandlerResponse(loginResponse);
 
-        if (response.Status == Common.OperationObjectResultStatus.Ok)
-            return ok(response.Value);
-        return StatusCode((int) response.Status);    
+            if (response.Status == Common.OperationObjectResultStatus.Ok)
+                return Ok(response.Value);
+            return StatusCode((int) response.Status);    
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            return StatusCode(500);
+        }
     }
-    catch (System.Exception)
-    {
-        logger.LogError(ex.Message)
-        return StatusCode(500);
     }
-}
-}
 
 public class ErrorResponse
 {

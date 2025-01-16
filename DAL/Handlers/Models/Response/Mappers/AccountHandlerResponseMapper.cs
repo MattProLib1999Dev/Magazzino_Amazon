@@ -30,27 +30,28 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
             return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponseGeneric(result);
         }
 
-        public static OperationObjectResult<List<UserDALResponse>> MapFromUserInfoHandlerResponse(OperationObjectResult<UserInfoHandlerResponse> response)
+        public static OperationObjectResult<List<UserDALResponse>> ConvertResponse(OperationObjectResult<UserInfoHandlerResponse> input)
         {
-            if (response.Status != OperationObjectResultStatus.Ok)
+            if (input.Status != OperationObjectResultStatus.Ok)
             {
-                return OperationObjectResult<List<UserDALResponse>>.CreateErrorResponse(response.Status, response.Message);
+                return OperationObjectResult<List<UserDALResponse>>.CreateErrorResponse(input.Status, input.Message);
             }
 
-            var result = new List<UserDALResponse>
+            var userDalResponseList = new List<UserDALResponse>
             {
                 new UserDALResponse
                 {
-                    IdUser = response.Value.IdUser,
-                    Name = response.Value.Name,
-                    Surname = response.Value.Surname,
-                    Username = response.Value.Username,
-                    Password = String.Empty // Assuming Password is an empty string for this case
+                    IdUser = input.Value.IdUser,
+                    Name = input.Value.Name,
+                    Surname = input.Value.Surname,
+                    Username = input.Value.Username,
+                    Password = string.Empty // Evitiamo di trasferire la password
                 }
             };
 
-            return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponseGeneric(result);
+            return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponseGeneric(userDalResponseList);
         }
+
 
         public static OperationObjectResult<LoginHandlerResponse> MapFromAccessTokenEncriptModel(OperationObjectResult<AccessTokenEncriptModel> response)
         {

@@ -283,3 +283,4 @@ C:\Users\matteo.proietti\progetti\Progetti personali e esercitazioni\esercitazio
 C:\Users\matteo.proietti\progetti\Progetti personali e esercitazioni\esercitazioni dotnet\Amazon\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.Scripting.resources.dll
 C:\Users\matteo.proietti\progetti\Progetti personali e esercitazioni\esercitazioni dotnet\Amazon\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Scripting.resources.dll
 C:\Users\matteo.proietti\progetti\Progetti personali e esercitazioni\esercitazioni dotnet\Amazon\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Scripting.resources.dll
+C:\Users\matteo.proietti\progetti\Progetti personali e esercitazioni\esercitazioni dotnet\Amazon\obj\Debug\net8.0\Amazon.sourcelink.json
