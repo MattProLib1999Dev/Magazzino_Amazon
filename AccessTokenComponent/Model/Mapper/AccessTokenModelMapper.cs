@@ -1,7 +1,9 @@
 using Amazon.AccessTokenComponent.Model;
+using Amazon.AccessTokenComponent.Model.Request;
 using Amazon.Common;
 using Amazon.DAL.Handlers.Models.Response.Response;
 using Amazon.DAL.Models.Response;
+using Amazon.Models.Request;
 using Amazon.Models.Response;
 
 public static class AccessTokenModelMapper
@@ -100,6 +102,11 @@ public static class AccessTokenModelMapper
             Password = response.Value.Password
         });
 
+    }
+
+    public static OperationObjectResult<RefreshTokenModelRequest> MapFromTokenHandlersRequest(TokenHandlerRequest request)
+    {
+        return OperationObjectResult<RefreshTokenModelRequest>.CreateCorrectResponseGeneric(new RefreshTokenModelRequest { AccessToken = request.AccessToken, RefreshToken = request.RefreshToken});
     }
 
 }

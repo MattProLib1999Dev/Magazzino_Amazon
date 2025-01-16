@@ -53,21 +53,15 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
         }
 
 
-        public static OperationObjectResult<LoginHandlerResponse> MapFromAccessTokenEncriptModel(OperationObjectResult<AccessTokenEncriptModel> response)
+        public static OperationObjectResult<TokenHandlerResponse> MapFromAccessTokenEncriptModel(OperationObjectResult<AccessTokenEncriptModelResponse> response)
         {
             if (response.Status != OperationObjectResultStatus.Ok)
-            {
-                return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(response.Status, response.Message);
-            }
-
-            var loginHandlerResponse = new LoginHandlerResponse
+                return OperationObjectResult<TokenHandlerResponse>.CreateErrorResponse(response.Status, response.Message);
+            return OperationObjectResult<TokenHandlerResponse>.CreateCorrectResponseGeneric(new TokenHandlerResponse
             {
                 AccessToken = response.Value.Accesstoken,
-                IdUser = response.Value.IdUser
-            };
-
-            // Creazione della risposta con il loginHandlerResponse
-            return OperationObjectResult<LoginHandlerResponse>.CreateCorrectResponseGeneric(loginHandlerResponse);
+                RefreshToken = response.Value.RefeshToken
+            });
         }
 
         public static UserDALResponse MapToUserDALResponse(Response.LoginHandlerResponse loginHandlerResponse)
@@ -114,7 +108,7 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
             return OperationObjectResult<UserHandlerResponse>.CreateCorrectResponseGeneric(userHandlerResponse);
         }
 
-       
+
 
 
     }

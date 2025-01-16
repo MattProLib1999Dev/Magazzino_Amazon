@@ -1,5 +1,7 @@
+using Amazon.AccessTokenComponent.Model;
 using Amazon.Appunti.Handlers.Abstract;
 using Amazon.Common;
+using Amazon.CustomComponents.Attributes;
 using Amazon.DAL.Handlers.Models.Request;
 using Amazon.DAL.Handlers.Models.Response.Mappers;
 using Amazon.DAL.Handlers.Models.Response.Response;
@@ -102,10 +104,26 @@ public class AccountController : ControllerBase
             return StatusCode(500);
         }
     }
+
+
+    [HttpGet("Test")]
+    [DeveloppareAuthorized]
+    public IActionResult TestAuth()
+    {
+        var feature = HttpContext.Features.Get<AccessTokenModel>();
+        return Ok(feature);
     }
 
-public class ErrorResponse
-{
-    public string ErrorMessage { get; set; } = String.Empty;
-    public string ErrorCode { get; set; } = String.Empty;
+
+
+
+
+
+    
+
+    public class ErrorResponse
+    {
+        public string ErrorMessage { get; set; } = String.Empty;
+        public string ErrorCode { get; set; } = String.Empty;
+    }
 }

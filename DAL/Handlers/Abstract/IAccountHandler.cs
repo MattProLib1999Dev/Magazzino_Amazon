@@ -1,9 +1,9 @@
 using Amazon.Common;
 using Amazon.DAL.Handlers.Models.Request;
+using Amazon.DAL.Handlers.Models.Response.Response;
 using Amazon.DAL.Models.Response;
 using Amazon.Models.Request;
 using Amazon.Models.Response;
-using LoginHandlerResponse = Amazon.Models.Response.LoginHandlerResponse;
 
 namespace Amazon.Appunti.Handlers.Abstract
 {
