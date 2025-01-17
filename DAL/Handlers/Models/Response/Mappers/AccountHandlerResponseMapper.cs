@@ -3,7 +3,6 @@ using Amazon.Common;
 using Amazon.DAL.Models.Response;
 using Amazon.DAL.Handlers.Models.Response.Response;
 using Amazon.Models.Response;
-using LoginHandlerResponse = Amazon.DAL.Handlers.Models.Response.Response.LoginHandlerResponse;
 
 namespace Amazon.DAL.Handlers.Models.Response.Mappers
 {
@@ -108,6 +107,12 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
             return OperationObjectResult<UserHandlerResponse>.CreateCorrectResponseGeneric(userHandlerResponse);
         }
 
+        public static OperationObjectResult<CreateUserHandlerResponse> MapFromCreateUsersHandlerResponse(OperationObjectResult<UserDALResponse> response)
+        {
+            if (response.Status != OperationObjectResultStatus.Ok)
+                return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(response.Status, response.Message);
+            return OperationObjectResult<CreateUserHandlerResponse>.CreateCorrectResponseGeneric(new CreateUserHandlerResponse());
+        }
 
 
 

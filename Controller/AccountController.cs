@@ -5,6 +5,7 @@ using Amazon.CustomComponents.Attributes;
 using Amazon.DAL.Handlers.Models.Request;
 using Amazon.DAL.Handlers.Models.Response.Mappers;
 using Amazon.DAL.Handlers.Models.Response.Response;
+using Amazon.Models;
 using Amazon.Models.Request;
 using Amazon.Models.Response;
 using Microsoft.AspNetCore.Mvc;
@@ -123,7 +124,7 @@ public async Task<IActionResult> Login([FromBody] LoginHandlerRequest request)
         }
 
         // Controllo dello stato della risposta
-        return HandleResponseStatus(response);
+        return HandleResponseStatus(response); 
     }
     catch (Exception ex)
     {
@@ -132,7 +133,54 @@ public async Task<IActionResult> Login([FromBody] LoginHandlerRequest request)
     }
 }
 
+
+[HttpPost("Create")]
+public async Task<IActionResult> CreateUser([FromBody] CreateUserModelRequest request)
+{
+    try
+    {
+        if (request == null)
+        {
+            _logger.LogWarning("La richiesta è null.");
+            return BadRequest("La richiesta non può essere null.");
+        }
+
+        // Mappatura della richiesta
+        var mappedRequest = AccountRequestMapper.MapToCreateUserRequest(request);
+
+        // Chiamata all'handler per creare l'utente
+        var createUserHandlerResponse = await _accountHandler.CreateUser(mappedRequest);
+
+        // Gestione dello stato della risposta usando il metodo helper
+        return HandleResponseStatus(createUserHandlerResponse);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Errore durante l'elaborazione della richiesta di creazione utente.");
+        return StatusCode(500, "Errore interno del server.");
+    }
+}
+
+
 // Metodo helper per gestire lo stato della risposta
+private IActionResult HandleResponseStatus(OperationObjectResult<CreateUserHandlerResponse> response)
+{
+    if (response == null)
+    {
+        _logger.LogError("La risposta è null.");
+        return StatusCode(500, "Errore interno del server: la risposta non può essere null.");
+    }
+
+    if (response.Status == OperationObjectResultStatus.Ok)
+    {
+        _logger.LogInformation("Utente creato con successo.");
+        return Ok(response.Value); // Restituisce il valore direttamente
+    }
+
+    _logger.LogWarning($"Errore durante la creazione dell'utente: {response.Status}. Messaggio: {response.Message}");
+    return StatusCode((int)response.Status, response.Message ?? "Errore sconosciuto durante la creazione dell'utente.");
+}
+
 private IActionResult HandleResponseStatus(OperationObjectResult<UserInfoModelResponse> response)
 {
     if (response.Status == OperationObjectResultStatus.Ok)
@@ -144,6 +192,7 @@ private IActionResult HandleResponseStatus(OperationObjectResult<UserInfoModelRe
     _logger.LogWarning($"Stato imprevisto della risposta: {response.Status}. Messaggio: {response.Message}");
     return StatusCode((int)response.Status, response.Message ?? "Stato non previsto.");
 }
+
 
 
 

@@ -1,5 +1,6 @@
 using Amazon.Common;
 using Amazon.DAL.Models.Response;
+using Amazon.Models;
 using Amazon.Models.Request;
 
 namespace Amazon.DAL.Handlers.Models.Request
@@ -22,6 +23,17 @@ namespace Amazon.DAL.Handlers.Models.Request
 				Password = request.Password
 			};
 		}
+
+		public static CreateUserDALRequest MapToCreateUserRequest(CreateUserHandlerRequest request)
+        {
+           return new CreateUserDALRequest
+		   {
+				Name = request.Name,
+				Surname = request.Surname,
+				Username = request.Username,
+				Password = request.Password
+		   };
+        }
 
 	}
 }

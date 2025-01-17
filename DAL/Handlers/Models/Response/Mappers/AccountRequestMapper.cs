@@ -1,4 +1,5 @@
 using Amazon.DAL.Handlers.Models.Request;
+using Amazon.Models;
 using Amazon.Models.Request;
 using Amazon.Models.Response;
 
@@ -26,6 +27,17 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
         {
             return new LoginHandlerRequest
             {
+                Username = request.Username,
+                Password = request.Password
+            };
+        }
+
+        public static CreateUserHandlerRequest MapToCreateUserRequest(CreateUserModelRequest request)
+        {
+            return new CreateUserHandlerRequest
+            {
+                Name = request.Name,
+                Surname = request.Surname,
                 Username = request.Username,
                 Password = request.Password
             };

@@ -1,10 +1,10 @@
-using Amazon.AccessTokenComponent.Model;
 using Amazon.Appunti.Handlers.Abstract;
 using Amazon.Common;
 using Amazon.DAL.Handlers.Models.Request;
 using Amazon.DAL.Handlers.Models.Response.Mappers;
 using Amazon.DAL.Handlers.Models.Response.Response;
 using Amazon.DAL.Models.Response;
+using Amazon.Models;
 using Amazon.Models.Request;
 using Amazon.Models.Response;
 
@@ -123,5 +123,22 @@ namespace Amazon.Handlers.Abstratc
             return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(OperationObjectResultStatus.Error, ex.Message);
         }
     }
+
+        public async Task<OperationObjectResult<CreateUserHandlerResponse>> CreateUser(CreateUserHandlerRequest request)
+        {
+            try
+            {
+              var mappedRequest = AccountHandlerRequestMapper.MapToCreateUserRequest(request);
+              var result = await accountDataSource.CreateUser(mappedRequest);
+              return AccountHandlerResponseMapper.MapFromCreateUsersHandlerResponse(result);
+            }
+            catch (Exception ex)
+            {
+              logger.LogError(ex.Message);
+              return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(OperationObjectResultStatus.Error, ex.Message);
+            }
+        }
+
+        
     }
 }

@@ -3,11 +3,13 @@ using Amazon.Appunti.Handlers.Abstract;
 using Amazon.Common;
 using Amazon.DAL.Handlers.Models.Request;
 using Amazon.DAL.Models.Response;
+using Amazon.Models.Request;
+using Azure;
 public class FakeDatabase : IAccountDataSource
 {
     private ILogger<FakeDatabase> logger;
     public List<UserDALResponse> Users = new List<UserDALResponse>();
-    public static long IdAutoincrememntPrimaryKeyUser = 0;
+    public long IdAutoincrememntPrimaryKeyUser = 0;
     public readonly List<UserDALResponse>? inputLogger;
 
     public FakeDatabase(ILogger<FakeDatabase> inputLogger)
@@ -104,6 +106,21 @@ public class FakeDatabase : IAccountDataSource
         ));
     }
 
-
-    
+    public Task<OperationObjectResult<UserDALResponse>> CreateUser(CreateUserDALRequest request)
+    {
+        try
+        {
+            var alreadyExist = Users.Any(x => x.Username.Equals(request.Username, StringComparison.InvariantCultureIgnoreCase));
+            if (alreadyExist)
+                return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.Conflict, "User Already Exists"));
+                var response = new UserDALResponse { Name = request.Name, Surname = request.Surname, Username = request.Username, Password = request.Password};
+                AddUsersInternal(response);
+                return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(response));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex.Message);
+            return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.Error));
+        }
+    }
 }
