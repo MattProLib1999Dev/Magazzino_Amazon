@@ -1,6 +1,7 @@
 using Amazon;
 using Amazon.AccessTokenComponent;
 using Amazon.Appunti.Handlers.Abstract;
+using Amazon.DAL.Handlers.PasswordHasher.Abstract;
 using Amazon.Handlers;
 using Amazon.Handlers.Abstratc;
 using Microsoft.EntityFrameworkCore;
@@ -97,4 +98,5 @@ static void AddServices(IServiceCollection services)
     services.AddSingleton<IAccountDataSource, FakeDatabase>();
     services.AddScoped<IAccountHandler, AccountHandlers>();
     services.AddScoped<IAccessTokenManager, DummyAccessToken>();
+    services.AddSingleton<IDevelopparePassworHasher, PBKDF2_PasswordHasher>();
 }

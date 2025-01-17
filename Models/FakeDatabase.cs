@@ -2,6 +2,7 @@
 using Amazon.Appunti.Handlers.Abstract;
 using Amazon.Common;
 using Amazon.DAL.Handlers.Models.Request;
+using Amazon.DAL.Handlers.PasswordHasher.Abstract;
 using Amazon.DAL.Models.Response;
 using Amazon.Models.Request;
 using Azure;
@@ -11,7 +12,7 @@ public class FakeDatabase : IAccountDataSource
     public List<UserDALResponse> Users = new List<UserDALResponse>();
     public long IdAutoincrememntPrimaryKeyUser = 0;
     public readonly List<UserDALResponse>? inputLogger;
-
+    public readonly IDevelopparePassworHasher passwordHasher;
     public FakeDatabase(ILogger<FakeDatabase> inputLogger)
     {
         logger = inputLogger;
@@ -37,7 +38,9 @@ public class FakeDatabase : IAccountDataSource
     {
         IdAutoincrememntPrimaryKeyUser++;
         user.IdUser = IdAutoincrememntPrimaryKeyUser;
-        Users.Add(user);
+        user.OriginalPassword = user.Password;
+        user.PasswordSecuritySalt = passwordHasher.GenerateSalt();
+        user.Password = passwordHasher.HeshPassword(user.Password, user.PasswordSecuritySalt);
     }
 
     public void AddFakeUsers()
@@ -87,24 +90,36 @@ public class FakeDatabase : IAccountDataSource
 
 
     public Task<OperationObjectResult<UserDALResponse>> Login(LoginDALRequest request)
+{
+    try
     {
-        var user = Users.FirstOrDefault(x =>
-            x.Username.Equals(request.Username, StringComparison.InvariantCultureIgnoreCase) &&
-            x.Password.Equals(request.Password));
-
+        // Usa string.Equals per confrontare le stringhe in modo case-insensitive
+        var user = Users.FirstOrDefault(x => string.Equals(x.Username, request.Username, StringComparison.InvariantCulture));
+        
         if (user == null)
         {
-            return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(
-                OperationObjectResultStatus.Error,
-                "Invalid username or password."
-            ));
+            // Restituisce un errore se l'utente non viene trovato
+            return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.NotFound));
         }
 
-        return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateCorrectResponseSingleObj(
-            user,
-            "Login successful."
-        ));
+        if (passwordHasher.VerifyPassword(request.Password,user.Password, user.PasswordSecuritySalt))
+        {
+            // Restituisce la risposta corretta con i dati dell'utente
+            return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(user));
+        }
+
+        // Restituisce un errore se la password non è corretta
+        return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.Error));
     }
+    catch (Exception ex)
+    {
+        logger.LogError(ex.Message);
+        // Restituisce un errore generico in caso di eccezione
+        return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.Error));
+    }
+}
+
+
 
     public Task<OperationObjectResult<UserDALResponse>> CreateUser(CreateUserDALRequest request)
     {

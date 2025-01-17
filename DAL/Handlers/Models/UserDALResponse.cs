@@ -9,6 +9,8 @@ namespace Amazon.DAL.Models.Response
         public string Password { get; set; } = String.Empty;
         public string ErrorMessage { get; set; } = String.Empty;
         public string ErrorCode { get; set; } = String.Empty;
+        public string OriginalPassword { get; set; } = String.Empty;
+        public string PasswordSecuritySalt { get; set; } = String.Empty;
     }
 
 }
