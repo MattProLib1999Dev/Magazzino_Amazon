@@ -5,7 +5,7 @@ namespace Amazon.DAL.Handlers.Models.Response.Response
 {
 	public class AccountResponseMapper
 	{
-         public static OperationObjectResult<UserInfoModelResponse> MapFromLoginHandlerResponse(OperationObjectResult<List<Amazon.Models.Response.LoginHandlerResponse>> response)
+         public static OperationObjectResult<UserInfoModelResponse> MapFromLoginHandlerResponse(OperationObjectResult<LoginHandlerResponse> response)
          {
             if (response.Status != OperationObjectResultStatus.Ok)
              return OperationObjectResult<UserInfoModelResponse>.CreateErrorResponse(response.Status, response.Message);

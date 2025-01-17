@@ -58,28 +58,28 @@ public class FakeDatabase : IAccountDataSource
     }
 
     public async Task<OperationObjectResult<UserDALResponse>> UserInfo(UserInfoHandlerRequest request)
-{
-    var selectedUser = Users.FirstOrDefault(x => x.IdUser == request.IdUser);
-
-    if (selectedUser == null)
     {
-        return OperationObjectResult<UserDALResponse>.CreateErrorResponse(
-            OperationObjectResultStatus.Error,
-            "User not found."
-        );
+        var selectedUser = Users.FirstOrDefault(x => x.IdUser == request.IdUser);
+
+        if (selectedUser == null)
+        {
+            return OperationObjectResult<UserDALResponse>.CreateErrorResponse(
+                OperationObjectResultStatus.Error,
+                "User not found."
+            );
+        }
+
+        var userResponse = await Task.Run(() => new UserDALResponse
+        {
+            IdUser = selectedUser.IdUser,
+            Name = selectedUser.Name,
+            Surname = selectedUser.Surname,
+            Username = selectedUser.Username,
+            Password = selectedUser.Password
+        });
+
+        return OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(userResponse);
     }
-
-    var userResponse = await Task.Run(() => new UserDALResponse
-    {
-        IdUser = selectedUser.IdUser,
-        Name = selectedUser.Name,
-        Surname = selectedUser.Surname,
-        Username = selectedUser.Username,
-        Password = selectedUser.Password
-    });
-
-    return OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(userResponse);
-}
 
 
 

@@ -6,7 +6,6 @@ using Amazon.DAL.Handlers.Models.Response.Response;
 using Amazon.DAL.Models.Response;
 using Amazon.Handlers.Abstratc;
 using Amazon.Models.Request;
-using Amazon.Models.Response;
 
 public class AccountHandlers : IAccountHandler
 {
@@ -98,57 +97,62 @@ public class AccountHandlers : IAccountHandler
       }
     }
 
-    public async Task<OperationObjectResult<List<LoginHandlerResponse>>> Login(LoginHandlerRequest request)
+    public async Task<OperationObjectResult<LoginHandlerResponse>> Login(LoginHandlerRequest request)
     {
-      try
-      {
-          // Mappa la richiesta di login al formato del sistema
-          var mappedRequest = AccountHandlerRequestMapper.MapToLoginRequest(request);
+        try
+        {
+            // Mappa la richiesta di login al formato del sistema
+            var mappedRequest = AccountHandlerRequestMapper.MapToLoginRequest(request);
 
-          // Esegui il login con l'accesso al data source
-          var user = await accountDataSource.Login(mappedRequest);
+            // Esegui il login con l'accesso al data source
+            var user = await accountDataSource.Login(mappedRequest);
 
-          // Se lo stato della risposta non è OK, restituisci un errore
-          if (user.Status != OperationObjectResultStatus.Ok)
-          {
-              return OperationObjectResult<List<LoginHandlerResponse>>.CreateErrorResponse(user.Status, user.Message);
-          }
+            // Se lo stato della risposta non è OK, restituisci un errore
+            if (user.Status != OperationObjectResultStatus.Ok)
+            {
+                return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(user.Status, user.Message);
+            }
 
-          // Mappa la risposta utente per il token di accesso
-          var userHandlerResponse = AccountHandlerResponseMapper.MapFromUserResponseForAccessToken(user);
+            // Mappa la risposta utente per il token di accesso
+            var userHandlerResponse = AccountHandlerResponseMapper.MapFromUserResponseForAccessToken(user);
 
-          // Mappa il modello di accesso del token
-          var requestAccessToken = AccessTokenModelMapper.MapToAccessTokenModel(userHandlerResponse);
+            // Mappa il modello di accesso del token
+            var requestAccessToken = AccessTokenModelMapper.MapToAccessTokenModel(userHandlerResponse);
 
-          // Genera il token di accesso
-          var result = await accessTokenManager.GenerateToken(requestAccessToken.Value);
+            // Genera il token di accesso
+            var result = await accessTokenManager.GenerateToken(requestAccessToken.Value);
 
-          // Se la generazione del token non è andata a buon fine, restituisci un errore
-          if (result.Status != OperationObjectResultStatus.Ok)
-          {
-              return OperationObjectResult<List<LoginHandlerResponse>>.CreateErrorResponse(result.Status, result.Message);
-          }
+            // Se la generazione del token non è andata a buon fine, restituisci un errore
+            if (result.Status != OperationObjectResultStatus.Ok)
+            {
+                return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(result.Status, result.Message);
+            }
 
-          // Mappa il risultato del token crittografato a una risposta da restituire
-          var responseList = new List<LoginHandlerResponse>
-          {
-              new LoginHandlerResponse
-              {
-                  AccessToken = result.Value.Accesstoken,
-                  IdUser = result.Value.IdUser
-              }
-          };
+            // Verifica che ci siano elementi nella lista
+            if (result.Value == null || !result.Value.Any())
+            {
+                return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(OperationObjectResultStatus.Error, "No access tokens were generated.");
+            }
 
-          // Restituisci una risposta corretta con la lista di LoginHandlerResponse
-          return OperationObjectResult<List<LoginHandlerResponse>>.CreateCorrectResponseGeneric(responseList);
-      }
-      catch (Exception ex)
-      {
-          // Log dell'errore e restituzione di una risposta di errore
-          logger.LogError(ex.Message);
-          return OperationObjectResult<List<LoginHandlerResponse>>.CreateErrorResponse(OperationObjectResultStatus.Error, ex.Message);
-      }
-}
+            // Accedi al primo elemento della lista
+            var firstToken = result.Value.First();
 
-    
+            // Mappa il risultato del token crittografato a una risposta da restituire
+            
+                var responseList = new LoginHandlerResponse
+                {
+                    AccessToken = firstToken.Accesstoken, // Assumendo che `Accesstoken` sia una proprietà valida in AccessTokenEncriptModel
+                    IdUser = firstToken.IdUser
+                };
+
+            // Restituisci una risposta corretta con la lista di LoginHandlerResponse
+            return OperationObjectResult<LoginHandlerResponse>.CreateCorrectResponseGeneric(responseList);
+        }
+        catch (Exception ex)
+        {
+            // Log dell'errore e restituzione di una risposta di errore
+            logger.LogError(ex.Message);
+            return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(OperationObjectResultStatus.Error, ex.Message);
+        }
+    }
 }

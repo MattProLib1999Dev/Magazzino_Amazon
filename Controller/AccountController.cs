@@ -86,24 +86,42 @@ public class AccountController : ControllerBase
 
 
     [HttpPost("Login")]
-    public async Task<IActionResult> Login([FromBody] LoginHandlerRequest request)
+public async Task<IActionResult> Login([FromBody] LoginHandlerRequest request)
+{
+    try
     {
-        try
-        {
-            var mappedRequest = AccountRequestMapper.MapToLoginRequest(request);
-            var loginResponse = await _accountHandler.Login(mappedRequest);
-            var response = AccountResponseMapper.MapFromLoginHandlerResponse(loginResponse);
+        // Validazione della richiesta
+        if (request == null)
+            return BadRequest("La richiesta è null.");
 
-            if (response.Status == Common.OperationObjectResultStatus.Ok)
-                return Ok(response.Value);
-            return StatusCode((int) response.Status);    
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.Message);
-            return StatusCode(500);
-        }
+        // Mappatura della richiesta
+        var mappedRequest = AccountRequestMapper.MapToLoginRequest(request);
+
+        // Login tramite il gestore account
+        var loginResponse = await _accountHandler.Login(mappedRequest);
+
+        if (loginResponse == null)
+            return StatusCode(500, "La risposta del gestore account è null.");
+
+        // Mappatura della risposta
+        var response = AccountResponseMapper.MapFromLoginHandlerResponse(loginResponse);
+
+        if (response == null)
+            return StatusCode(500, "Errore nella mappatura della risposta.");
+
+        // Controllo dello stato della risposta
+        if (response.Status == OperationObjectResultStatus.Ok)
+            return Ok(response.Value);
+
+        return StatusCode((int)response.Status, "Stato non previsto.");
     }
+    catch (Exception ex)
+    {
+        _logger.LogError($"Errore durante il login: {ex.Message} - {ex.StackTrace}");
+        return StatusCode(500, "Errore interno del server.");
+    }
+}
+
 
 
     [HttpGet("Test")]

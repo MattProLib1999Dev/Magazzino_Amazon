@@ -92,7 +92,6 @@ namespace Amazon.AccessTokenComponent
             return Task.FromResult(OperationObjectResult<AccessTokenEncriptModelResponse>.CreateErrorResponse(OperationObjectResultStatus.NotFound));
 
 
-            accessToken_key
         }
     }
 }
