@@ -6,6 +6,7 @@ using Amazon.DAL.Handlers.Models.Request;
 using Amazon.DAL.Handlers.Models.Response.Mappers;
 using Amazon.DAL.Handlers.Models.Response.Response;
 using Amazon.Models.Request;
+using Amazon.Models.Response;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Amazon;
@@ -85,42 +86,65 @@ public class AccountController : ControllerBase
 
 
 
-    [HttpPost("Login")]
+[HttpPost("Login")]
 public async Task<IActionResult> Login([FromBody] LoginHandlerRequest request)
 {
     try
     {
         // Validazione della richiesta
         if (request == null)
+        {
+            _logger.LogWarning("Richiesta di login ricevuta è null.");
             return BadRequest("La richiesta è null.");
+        }
 
         // Mappatura della richiesta
         var mappedRequest = AccountRequestMapper.MapToLoginRequest(request);
+        if (mappedRequest == null)
+        {
+            _logger.LogWarning("Errore durante la mappatura della richiesta di login.");
+            return BadRequest("Errore nella mappatura della richiesta.");
+        }
 
         // Login tramite il gestore account
         var loginResponse = await _accountHandler.Login(mappedRequest);
-
         if (loginResponse == null)
-            return StatusCode(500, "La risposta del gestore account è null.");
+        {
+            _logger.LogError("Il gestore account ha restituito una risposta null.");
+            return StatusCode(500, "Errore nel gestore account.");
+        }
 
         // Mappatura della risposta
         var response = AccountResponseMapper.MapFromLoginHandlerResponse(loginResponse);
-
         if (response == null)
-            return StatusCode(500, "Errore nella mappatura della risposta.");
+        {
+            _logger.LogError("Errore durante la mappatura della risposta del gestore account.");
+            return StatusCode(500, "Errore interno durante la mappatura della risposta.");
+        }
 
         // Controllo dello stato della risposta
-        if (response.Status == OperationObjectResultStatus.Ok)
-            return Ok(response.Value);
-
-        return StatusCode((int)response.Status, "Stato non previsto.");
+        return HandleResponseStatus(response);
     }
     catch (Exception ex)
     {
-        _logger.LogError($"Errore durante il login: {ex.Message} - {ex.StackTrace}");
+        _logger.LogError(ex, "Errore imprevisto durante l'operazione di login.");
         return StatusCode(500, "Errore interno del server.");
     }
 }
+
+// Metodo helper per gestire lo stato della risposta
+private IActionResult HandleResponseStatus(OperationObjectResult<UserInfoModelResponse> response)
+{
+    if (response.Status == OperationObjectResultStatus.Ok)
+    {
+        _logger.LogInformation("Login effettuato con successo per l'utente.");
+        return Ok(response.Value);
+    }
+
+    _logger.LogWarning($"Stato imprevisto della risposta: {response.Status}. Messaggio: {response.Message}");
+    return StatusCode((int)response.Status, response.Message ?? "Stato non previsto.");
+}
+
 
 
 
