@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Amazon.Models.Request;
 
 namespace Amazon.Models
 {
@@ -23,6 +24,18 @@ namespace Amazon.Models
         [Required]
         [MinLength(4, ErrorMessage = "Must be at least 4 chararcters")]
         public string ConfirmPassword { get; set; } = String.Empty;
+
+        public static LoginHandlerRequest From(CreateUserModelRequest request)
+        {
+                if (request == null)
+                throw new ArgumentNullException(nameof(request), "LoginRequest cannot be null");
+
+                return new LoginHandlerRequest
+                {
+                Username = request.Username,
+                Password = request.Password
+                };
+        }
 
 
 

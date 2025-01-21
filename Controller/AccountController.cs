@@ -135,38 +135,42 @@ public async Task<IActionResult> Login([FromBody] LoginHandlerRequest request)
 }
 
 
-[HttpPost("Create")]
-public async Task<IActionResult> CreateUser([FromBody] CreateUserModelRequest request)
+[HttpPost("login")]
+public async Task<IActionResult> Login([FromBody] LoginModelRequest request)
 {
+    // Validazione del parametro di input
+    if (request == null || string.IsNullOrWhiteSpace(request.UserName) || string.IsNullOrWhiteSpace(request.Password))
+    {
+        _logger.LogWarning("Invalid login request: missing username or password.");
+        return BadRequest("Invalid request. Username and password are required.");
+    }
+
     try
     {
-        // Mappa la richiesta al formato utilizzato dal gestore
-        var mappedRequest = AccountRequestMapper.MapToCreateUserRequest(request);
+        // Conversione a LoginHandlerRequest
+        var handlerRequest = LoginModelRequest.From(request);
 
-        // Chiamata asincrona al gestore per creare l'utente
-        var createUserHandlerResponse = await _accountHandler.CreateUser(mappedRequest);
+        // Invocazione del gestore (AccountHandlers)
+        var result = await _accountHandler.Login(handlerRequest);
 
-        // Mappa la risposta del gestore al formato richiesto dall'API
-        var response = AccountResponseMapper.MapFromCreateUsersHandlerResponse(createUserHandlerResponse);
-
-        // Controlla lo stato della risposta e restituisci il risultato appropriato
-        if (response.Status == Common.OperationObjectResultStatus.Ok)
+        // Gestione del risultato
+        if (result.Status != OperationObjectResultStatus.Ok)
         {
-            return Ok(response.Value); // 200 OK con il valore della risposta
+            _logger.LogWarning("Login failed: {Status}, Message: {Message}", result.Status, result.Message);
+            return StatusCode((int)result.Status, result.Message);
         }
 
-        // Restituisci lo stato HTTP in base al codice di stato
-        return StatusCode((int)response.Status);
+        _logger.LogInformation("User logged in successfully: {Username}", request.UserName);
+        return Ok(result);
     }
     catch (Exception ex)
     {
-        // Log dell'errore per diagnosi
-        _logger.LogError(ex, "Errore durante la creazione dell'utente");
-
-        // Restituisce 500 Internal Server Error in caso di eccezione
-        return StatusCode(500, "Errore interno del server");
+        _logger.LogError(ex, "An unexpected error occurred during login for Username: {Username}", request.UserName);
+        return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
     }
 }
+
+
 
 
 

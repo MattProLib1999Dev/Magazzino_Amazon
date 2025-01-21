@@ -1,4 +1,5 @@
-﻿using Amazon;
+﻿using System.Linq.Expressions;
+using Amazon;
 using Amazon.AccessTokenComponent.Model.Abstract;
 using Amazon.Appunti.Handlers.Abstract;
 using Amazon.Common;
@@ -11,7 +12,10 @@ using Amazon.DoubleOptInComponent.Abastract;
 using Amazon.Handlers.Abstract;
 using Amazon.Handlers.Abstratc.Mappers;
 using Amazon.Models.Request;
-public class FakeDatabase : IAccountDataSource
+using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Update;
+public class FakeDatabase : IAccountDataSource, IDatabase
 {
     private ILogger<FakeDatabase> logger;
     public List<UserDALResponse> Users = new List<UserDALResponse>();
@@ -25,6 +29,12 @@ public class FakeDatabase : IAccountDataSource
         Users = new List<UserDALResponse>();
         _passwordHasher = passworHasher;
         AddFakeUsers();
+    }
+
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        // Qui puoi fare logica personalizzata che simula un'operazione di salvataggio
+        return Task.FromResult(1); // Simula che 1 riga è stata modificata
     }
 
     public List<AddProdotto> ListProdotto { get; set; } = new List<AddProdotto>();
@@ -103,31 +113,40 @@ public class FakeDatabase : IAccountDataSource
 {
     try
     {
-        // Usa string.Equals per confrontare le stringhe in modo case-insensitive
-        var user = Users.FirstOrDefault(x => x.isValid() && string.Equals(x.Username, request.Username, StringComparison.InvariantCulture));
-        
+        logger.LogInformation("Attempting login for Username: {Username}", request.Username);
+
+        var user = Users.FirstOrDefault(u => u.isValid() && u.Username.Equals(request.Username, StringComparison.InvariantCultureIgnoreCase));
         if (user == null)
         {
-            // Restituisce un errore se l'utente non viene trovato
-            return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.NotFound));
+            logger.LogWarning("Login failed: User not found for Username: {Username}", request.Username);
+            return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.NotFound, "User not found"));
         }
 
-        if (_passwordHasher.VerifyPassword(request.Password,user.Password, user.PasswordSecuritySalt))
+        if (user.Password != request.Password)
         {
-            // Restituisce la risposta corretta con i dati dell'utente
-            return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(user));
+            logger.LogWarning("Login failed: Invalid password for Username: {Username}", request.Username);
+            return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.Conflict, "Invalid password"));
         }
 
-        // Restituisce un errore se la password non è corretta
-        return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.Error));
+        // Create a response for successful login
+        var response = new UserDALResponse
+        {
+            Name = user.Name,
+            Surname = user.Surname,
+            Username = user.Username,
+            Status = user.Status
+        };
+
+        logger.LogInformation("Login successful for Username: {Username}", request.Username);
+        return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(response));
     }
     catch (Exception ex)
     {
-        logger.LogError(ex.Message);
-        // Restituisce un errore generico in caso di eccezione
-        return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.Error));
+        logger.LogError(ex, "An error occurred during login for Username: {Username}", request.Username);
+        return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.Error, ex.Message));
     }
 }
+
 
 
 
@@ -234,6 +253,26 @@ public class FakeDatabase : IAccountDataSource
         }
 
     public Task<OperationObjectResult<ConfirmUserHandlerResponse>> ConfirmUser(List<ConfirmUserHandlerRequest> request)
+    {
+        throw new NotImplementedException();
+    }
+
+    public int SaveChanges(IList<IUpdateEntry> entries)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<int> SaveChangesAsync(IList<IUpdateEntry> entries, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Func<QueryContext, TResult> CompileQuery<TResult>(Expression query, bool async)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Expression<Func<QueryContext, TResult>> CompileQueryExpression<TResult>(Expression query, bool async, IReadOnlySet<string> nonNullableReferenceTypeParameters)
     {
         throw new NotImplementedException();
     }

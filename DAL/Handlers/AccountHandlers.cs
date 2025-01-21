@@ -11,6 +11,7 @@ using Amazon.Handlers.Abstratc;
 using Amazon.Handlers.Abstratc.Mappers;
 using Amazon.Models.Request;
 using Amazon.Models.Response;
+using Microsoft.EntityFrameworkCore.Storage;
 
 public class AccountHandlers : IAccountHandler
 {
@@ -19,6 +20,28 @@ public class AccountHandlers : IAccountHandler
     private readonly IAccessTokenManager _accessTokenManager;
     private readonly IDoubleOptInManager _doubleOptInManager;
     private object _passwordHasher;
+    private readonly IDatabase database;
+
+    private readonly List<UserDALResponse> users = new List<UserDALResponse>
+    {
+        new UserDALResponse
+        {
+            Username = "user1",
+            Password = "password123",
+            Name = "John",
+            Surname = "Doe",
+            Status = UserStatus.Created
+        },
+        new UserDALResponse
+        {
+            Username = "user2",
+            Password = "password456",
+            Name = "Jane",
+            Surname = "Smith",
+            Status = UserStatus.Created
+        }
+    };
+
 
     public List<UserDALResponse> Users { get; } = new List<UserDALResponse>();
     public int IdAutoincrememntPrimaryKeyUser { get; private set; }
@@ -27,12 +50,30 @@ public class AccountHandlers : IAccountHandler
         IAccountDataSource accountDataSource,
         ILogger<AccountHandlers> logger,
         IAccessTokenManager accessTokenManager,
-        IDoubleOptInManager doubleOptInManager)
+        IDoubleOptInManager doubleOptInManager,
+        IDatabase database)
     {
         _accountDataSource = accountDataSource ?? throw new ArgumentNullException(nameof(accountDataSource));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _accessTokenManager = accessTokenManager ?? throw new ArgumentNullException(nameof(accessTokenManager));
         _doubleOptInManager = doubleOptInManager ?? throw new ArgumentNullException(nameof(doubleOptInManager));
+            this.database = database ?? throw new ArgumentNullException(nameof(database));
+
+    }
+
+    public Task<OperationObjectResult<UserDALResponse>> LoginAsync(string username, string password)
+    {
+        var user = users.FirstOrDefault(u =>
+            u.Username.Equals(username, StringComparison.InvariantCultureIgnoreCase) &&
+            u.Password == password);
+
+        if (user == null)
+        {
+            return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(
+                OperationObjectResultStatus.NotFound, "Invalid username or password."));
+        }
+
+        return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(user));
     }
 
     public async Task<OperationObjectResult<List<UserDALResponse>>> GetAllUsers()
@@ -109,52 +150,38 @@ public class AccountHandlers : IAccountHandler
         }
     }
 
-    public async Task<OperationObjectResult<LoginHandlerResponse>> Login(LoginHandlerRequest request)
+    public async Task<OperationObjectResult<UserDALResponse>> LoginAsync(LoginHandlerRequest request)
+{
+    try
     {
-        var handlerResponse = new LoginHandlerResponse();
-        try
+        // Verifica che la richiesta non sia nulla
+        if (request == null)
         {
-            var mappedRequest = Amazon.DAL.Handlers.Models.Request.AccountHandlerRequestMapper.MapToLoginRequest(request);
-            var user = await _accountDataSource.Login(mappedRequest);
-
-            if (user.Status != OperationObjectResultStatus.Ok)
-            {
-                return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(user.Status, user.Message);
-            }
-
-            var userHandlerResponse = AccountHandlerResponseMapper.MapToUserDALResponse(user);
-            var requestAccessToken = AccessTokenModelMapper.MapToAccessTokenModel(userHandlerResponse);
-
-            if (requestAccessToken?.Value == null)
-            {
-                return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(
-                    OperationObjectResultStatus.Error, "Failed to map AccessTokenModel.");
-            }
-
-            var result = await _accessTokenManager.GenerateToken(requestAccessToken.Value);
-
-            if (result.Status != OperationObjectResultStatus.Ok || result.Value == null)
-            {
-                return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(
-                    OperationObjectResultStatus.Error, "Failed to generate access token.");
-            }
-
-            foreach (var response in mappedRequest)
-            {
-                 new LoginHandlerResponse      
-                {
-                    AccessToken = response.AccessToken,
-                    IdUser = response.IdUser
-                };
-            }
+            _logger.LogWarning("LoginHandlerRequest is null.");
+            return OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.BadRequest, "Request cannot be null.");
         }
-        catch (Exception ex)
+
+        // Invoca il metodo asincrono sul database
+        var result = await LoginAsync(request.Username, request.Password);
+
+        // Verifica lo stato del risultato
+        if (result.Status != OperationObjectResultStatus.Ok)
         {
-            _logger.LogError(ex, "Error during login.");
-            return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(OperationObjectResultStatus.Error, ex.Message);
+            _logger.LogWarning("Login failed with status: {Status}. Message: {Message}", result.Status, result.Message);
+            return OperationObjectResult<UserDALResponse>.CreateErrorResponse(result.Status, result.Message);
         }
-        return OperationObjectResult<LoginHandlerResponse>.CreateCorrectResponseGeneric(handlerResponse);
+
+        _logger.LogInformation("Login successful for Username: {Username}", request.Username);
+        return result;
     }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "An error occurred during login for Username: {Username}", request.Username);
+        return OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.Error, ex.Message);
+    }
+}
+
+
 
     public async Task<OperationObjectResult<CreateUserHandlerResponse>> CreateUser(OperationObjectResult<List<UserDALResponse>> request)
     {
@@ -285,5 +312,8 @@ public class AccountHandlers : IAccountHandler
         }
     }
 
-   
+    Task<OperationObjectResult<LoginHandlerResponse>> IAccountHandler.Login(LoginHandlerRequest request)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -7,12 +7,16 @@ using Amazon.DoubleOptInComponent.Dummy;
 using Amazon.Handlers;
 using Amazon.Handlers.Abstratc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 AddLogging(builder.Logging, builder.Configuration);
 // Add services to the container.
 AddServices(builder.Services);
+// Supponiamo che tu stia usando la tua interfaccia `IDatabase`
+
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -23,7 +27,9 @@ builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Debug);
 builder.Services.AddScoped<IProdottoService, ProdottoService>();
 builder.Services.AddScoped<IProdottiRepository>();
+builder.Services.AddScoped<IDatabase, FakeDatabase>();
 builder.Services.AddSingleton<FakeDatabase>();
+
 
 //amazan add cors 
 builder.Services.AddCors(options => {

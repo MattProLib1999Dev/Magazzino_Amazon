@@ -43,7 +43,7 @@ namespace Amazon.AccessTokenComponent
             {
                 new AccessTokenEncriptModel
                 {
-                    Accesstoken = accessToken,
+                    Accesstoken = input.AccesstokemModel,
                     IdUser = input.IdUser
                 }
             };
