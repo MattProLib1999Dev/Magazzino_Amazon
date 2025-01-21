@@ -1,23 +1,29 @@
 ﻿using Amazon;
+using Amazon.AccessTokenComponent.Model.Abstract;
 using Amazon.Appunti.Handlers.Abstract;
 using Amazon.Common;
 using Amazon.DAL.Handlers.Models.Request;
+using Amazon.DAL.Handlers.Models.Response;
+using Amazon.DAL.Handlers.Models.Response.Mappers;
 using Amazon.DAL.Handlers.PasswordHasher.Abstract;
 using Amazon.DAL.Models.Response;
+using Amazon.DoubleOptInComponent.Abastract;
+using Amazon.Handlers.Abstract;
+using Amazon.Handlers.Abstratc.Mappers;
 using Amazon.Models.Request;
-using Amazon.Models.Response;
-using Azure;
 public class FakeDatabase : IAccountDataSource
 {
     private ILogger<FakeDatabase> logger;
     public List<UserDALResponse> Users = new List<UserDALResponse>();
     public long IdAutoincrememntPrimaryKeyUser = 0;
     public readonly List<UserDALResponse>? inputLogger;
-    public readonly IDevelopparePassworHasher passwordHasher;
-    public FakeDatabase(ILogger<FakeDatabase> inputLogger)
+    public readonly IDevelopparePassworHasher _passwordHasher;
+    public readonly IDoubleOptInManager _doubleOptInManager;
+    public FakeDatabase(ILogger<FakeDatabase> inputLogger, IDevelopparePassworHasher passworHasher)
     {
         logger = inputLogger;
         Users = new List<UserDALResponse>();
+        _passwordHasher = passworHasher;
         AddFakeUsers();
     }
 
@@ -32,16 +38,18 @@ public class FakeDatabase : IAccountDataSource
     public UpdateProdottoDtoInput ModificaUnProdotto = new UpdateProdottoDtoInput();
 
     public List<ProdottoEntity> prodotto { get; set; } = new List<ProdottoEntity>();
+    private readonly ILogger<AccountHandler> _logger;
 
     public bool prodottoCancellato = new bool();
+    private IAccessTokenManager _accountDataSource;
 
     public void AddUsersInternal(UserDALResponse user)
     {
         IdAutoincrememntPrimaryKeyUser++;
         user.IdUser = IdAutoincrememntPrimaryKeyUser;
         user.OriginalPassword = user.Password;
-        user.PasswordSecuritySalt = passwordHasher.GenerateSalt();
-        user.Password = passwordHasher.HeshPassword(user.Password, user.PasswordSecuritySalt);
+        user.PasswordSecuritySalt = _passwordHasher.GenerateSalt();
+        user.Password = _passwordHasher.HeshPassword(user.Password, user.PasswordSecuritySalt);
         user.AccountSecuritySalt = Guid.NewGuid().ToString("N");
     }
 
@@ -104,7 +112,7 @@ public class FakeDatabase : IAccountDataSource
             return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.NotFound));
         }
 
-        if (passwordHasher.VerifyPassword(request.Password,user.Password, user.PasswordSecuritySalt))
+        if (_passwordHasher.VerifyPassword(request.Password,user.Password, user.PasswordSecuritySalt))
         {
             // Restituisce la risposta corretta con i dati dell'utente
             return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(user));
@@ -180,7 +188,46 @@ public class FakeDatabase : IAccountDataSource
         return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(user));
     }
 
-    public Task<OperationObjectResult<UserDALResponse>> ConfirmUser(List<ConfirmCreateUserDALRequest> request)
+        public async Task<OperationObjectResult<ConfirmUserHandlerResponse>> ConfirmUser(ConfirmUserHandlerRequest request)
+        {
+            try
+            {
+                // Map the confirmation request
+                var mappedRequest = DoubleOptInRequestMapper.MatToDoubleOptInRequest(request);
+
+                // Verify the double opt-in token
+                var verifyResult = await _doubleOptInManager.VerifyDoubleOptInToken(mappedRequest);
+
+                // Check if verification was successful
+                if (verifyResult.Status != OperationObjectResultStatus.Ok)
+                {
+                    return OperationObjectResult<ConfirmUserHandlerResponse>.CreateErrorResponse(OperationObjectResultStatus.BadRequest);
+                }
+
+                // Map the verification result to a list of UserDALResponse
+                var dalRequest = verifyResult.Value.Select(optIn => new ConfirmCreateUserDALRequest 
+                {
+                    IdUser = optIn.IdUser,
+                    Username = optIn.Username,
+                    // Map other properties here as necessary
+                }).ToList();
+
+
+                // Call to confirm the user
+                var result = await _accountDataSource.ConfirmUser(dalRequest);
+
+                // Map the confirmed user response
+                return AccountHandlerResponseMapper.MapUserResponseConfirmUser(result);
+            }
+            catch (Exception ex)
+            {
+                // Log errors and return error response with the message
+                _logger.LogError(ex, "Error during user confirmation process");
+                return OperationObjectResult<ConfirmUserHandlerResponse>.CreateErrorResponse(OperationObjectResultStatus.Ok, ex.Message);
+            }
+        }
+
+    public Task<OperationObjectResult<ConfirmUserHandlerResponse>> ConfirmUser(List<ConfirmUserHandlerRequest> request)
     {
         throw new NotImplementedException();
     }

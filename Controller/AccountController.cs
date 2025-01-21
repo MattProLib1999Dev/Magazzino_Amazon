@@ -138,21 +138,36 @@ public async Task<IActionResult> Login([FromBody] LoginHandlerRequest request)
 [HttpPost("Create")]
 public async Task<IActionResult> CreateUser([FromBody] CreateUserModelRequest request)
 {
-   try
-   {
-    var mappedRequest = AccountRequestMapper.MapToCreateUserRequest(request);
-    var CreateUserHandlerResponse = await _accountHandler.CreateUser(mappedRequest);
-    var response = AccountResponseMapper.MapFromCreateUsersHandlerResponse(CreateUserHandlerResponse);
-    if (response.Status == Common.OperationObjectResultStatus.Ok)
-        return Ok(response.Value);
-    return StatusCode((int)response.Status);
-   }
-   catch (Exception ex) 
-   {
-    _logger.LogError(ex.Message);
-    return StatusCode(500);
-   }
+    try
+    {
+        // Mappa la richiesta al formato utilizzato dal gestore
+        var mappedRequest = AccountRequestMapper.MapToCreateUserRequest(request);
+
+        // Chiamata asincrona al gestore per creare l'utente
+        var createUserHandlerResponse = await _accountHandler.CreateUser(mappedRequest);
+
+        // Mappa la risposta del gestore al formato richiesto dall'API
+        var response = AccountResponseMapper.MapFromCreateUsersHandlerResponse(createUserHandlerResponse);
+
+        // Controlla lo stato della risposta e restituisci il risultato appropriato
+        if (response.Status == Common.OperationObjectResultStatus.Ok)
+        {
+            return Ok(response.Value); // 200 OK con il valore della risposta
+        }
+
+        // Restituisci lo stato HTTP in base al codice di stato
+        return StatusCode((int)response.Status);
+    }
+    catch (Exception ex)
+    {
+        // Log dell'errore per diagnosi
+        _logger.LogError(ex, "Errore durante la creazione dell'utente");
+
+        // Restituisce 500 Internal Server Error in caso di eccezione
+        return StatusCode(500, "Errore interno del server");
+    }
 }
+
 
 
 // Metodo helper per gestire lo stato della risposta

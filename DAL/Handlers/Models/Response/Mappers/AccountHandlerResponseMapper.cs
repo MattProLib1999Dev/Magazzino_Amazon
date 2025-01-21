@@ -167,7 +167,7 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
             };
         }
 
-public static OperationObjectResult<ConfirmUserHandlerResponse> MapUserResponseConfirmUser(OperationObjectResult<UserDALResponse> response)
+public static OperationObjectResult<ConfirmUserHandlerResponse> MapUserResponseConfirmUser(OperationObjectResult<ConfirmUserHandlerResponse> response)
 {
     if (response.Status != OperationObjectResultStatus.Ok)
         return OperationObjectResult<ConfirmUserHandlerResponse>.CreateErrorResponse(response.Status, response.Message);

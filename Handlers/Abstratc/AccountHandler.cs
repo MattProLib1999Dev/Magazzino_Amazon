@@ -19,7 +19,7 @@ namespace Amazon.Handlers.Abstract
     {
         private readonly ILogger<AccountHandler> _logger;
         private readonly IAccountDataSource _accountDataSource;
-        private readonly IAccessTokenManager _accessTokenManager;
+        private readonly  IAccessTokenManager _accessTokenManager;
         private readonly IDoubleOptInManager _doubleOptInManager;
 
         public AccountHandler(
@@ -169,11 +169,6 @@ namespace Amazon.Handlers.Abstract
             }
         }
 
-        Task<OperationObjectResult<List<UserDALResponse>>> IAccountHandler.CreateUser(OperationObjectResult<List<UserDALResponse>> request)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<OperationObjectResult<ConfirmUserHandlerResponse>> ConfirmUser(ConfirmUserHandlerRequest request)
         {
             try
@@ -191,7 +186,7 @@ namespace Amazon.Handlers.Abstract
                 }
 
                 // Map the verification result to a list of UserDALResponse
-                var dalRequest = verifyResult.Value.Select(optIn => new ConfirmCreateUserDALRequest
+                var dalRequest = verifyResult.Value.Select(optIn => new ConfirmUserHandlerRequest 
                 {
                     IdUser = optIn.IdUser,
                     Username = optIn.Username,
@@ -212,5 +207,6 @@ namespace Amazon.Handlers.Abstract
                 return OperationObjectResult<ConfirmUserHandlerResponse>.CreateErrorResponse(OperationObjectResultStatus.Ok, ex.Message);
             }
         }
+
     }
 }

@@ -8,5 +8,7 @@ namespace Amazon.Models.Request
         public string Username { get; set; } = String.Empty;
 
         public string Password { get; set; } = String.Empty;
+		public string AccessToken { get; set; } = String.Empty;
+		public long IdUser{ get; set; } 
 	}
 }

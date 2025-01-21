@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Cors;
+﻿using Amazon.DAL.Handlers.PasswordHasher.Abstract;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Amazon;
@@ -18,8 +19,8 @@ public class ProdottiController(IConfiguration configuration, IProdottiRepositor
 
     public record ProdottiControllerRecord(ILogger InputLogger, FakeDatabase Database)
     {
-        public ProdottiControllerRecord(ILogger inputLogger, ILogger<FakeDatabase> fakeDbLogger)
-            : this(inputLogger, new FakeDatabase(fakeDbLogger))
+        public ProdottiControllerRecord(ILogger inputLogger, ILogger<FakeDatabase> fakeDbLogger, IDevelopparePassworHasher passworHasher)
+            : this(inputLogger, new FakeDatabase(fakeDbLogger, passworHasher))
         {
         }
     }

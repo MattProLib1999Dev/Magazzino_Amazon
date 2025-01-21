@@ -9,5 +9,8 @@ namespace Amazon.Models.Response
 		public string Surname { get; set; } = String.Empty;
 		public string Password { get; set; } = String.Empty;
 
+		public string AccessToken { get; set; } = String.Empty;
+		public string RefreshToken { get; set; } = String.Empty;
+
 	}
 }

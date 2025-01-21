@@ -36,19 +36,20 @@ namespace Amazon.DAL.Handlers.Models.Response.Response
             return OperationObjectResult<UserInfoModelResponse>.CreateCorrectResponseGeneric(userInfoModelResponse);
         }
 
-        public static OperationObjectResult<TokenModelResponse> MapFromCreateUsersHandlerResponse(OperationObjectResult<List<UserDALResponse>> response)
-        {
-            if (response.Status != OperationObjectResultStatus.Ok || response.Value == null || !response.Value.Any())
-                return OperationObjectResult<TokenModelResponse>.CreateErrorResponse(response.Status, response.Message);
+        public static OperationObjectResult<CreateUserHandlerResponse> MapFromCreateUsersHandlerResponse(OperationObjectResult<CreateUserHandlerResponse> response)
+{
+    if (response.Status != OperationObjectResultStatus.Ok || response.Value == null)
+        return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(response.Status, response.Message);
 
-            var userDALResponse = response.Value.First();  // Assuming you want the first user
+    var userDALResponse = response.Value;  // Singolo oggetto, non una lista
 
-            return OperationObjectResult<TokenModelResponse>.CreateCorrectResponseGeneric(new TokenModelResponse
-            {
-                AccessToken = userDALResponse.AccessToken,
-                RefreshToken = userDALResponse.RefreshToken
-            });
-        }
+    return OperationObjectResult<CreateUserHandlerResponse>.CreateCorrectResponseGeneric(new CreateUserHandlerResponse
+    {
+        AccessToken = userDALResponse.AccessToken,
+        RefreshToken = userDALResponse.RefreshToken
+    });
+}
+
 
 
         public static OperationObjectResult<List<UserModelResponse>> MapFromUsersHandler(OperationObjectResult<List<UserHandlerResponse>> users)
