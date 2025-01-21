@@ -132,39 +132,45 @@ public class FakeDatabase : IAccountDataSource
 
 
     public Task<OperationObjectResult<UserDALResponse>> CreateUser(CreateUserDALRequest request)
+{
+    try
     {
-        try
-        {
-            var user = Users.FirstOrDefault(u => u.isValid() && u.Username.Equals(request.Username, StringComparison.InvariantCultureIgnoreCase));
-            if (user == null)
-            {
-                var response = new UserDALResponse
-                {
-                    Name = request.Name,
-                    Surname = request.Surname,
-                    Username = request.Username,
-                    Password = request.Password,
-                    Status = UserStatus.Created
-                };
+        logger.LogInformation("Starting CreateUser with Username: {Username}", request.Username);
 
-                AddUsersInternal(response);
-                return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(response));
-            }
-            else if (user.Status == UserStatus.Created)
-            {
-                user.AccountSecuritySalt = Guid.NewGuid().ToString("N");
-                return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.Conflict, "User Already Exists"));
-            }
-
-            // Handle other statuses or unexpected cases
-            return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.BadRequest, "Bad request User Status"));
-        }
-        catch (Exception ex)
+        var user = Users.FirstOrDefault(u => u.isValid() && u.Username.Equals(request.Username, StringComparison.InvariantCultureIgnoreCase));
+        if (user == null)
         {
-            logger.LogError(ex.Message);
-            return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.Error));
+            var response = new UserDALResponse
+            {
+                Name = request.Name,
+                Surname = request.Surname,
+                Username = request.Username,
+                Password = request.Password,
+                Status = UserStatus.Created
+            };
+
+            AddUsersInternal(response);
+            logger.LogInformation("User created successfully: {Username}", request.Username);
+            return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(response));
         }
+        else if (user.Status == UserStatus.Created)
+        {
+            logger.LogWarning("User already exists: {Username}", request.Username);
+            user.AccountSecuritySalt = Guid.NewGuid().ToString("N");
+            return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.Conflict, "User Already Exists"));
+        }
+
+        // Handle other statuses or unexpected cases
+        logger.LogError("Unhandled user status: {Status} for Username: {Username}", user.Status, request.Username);
+        return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.BadRequest, $"Bad request User Status: {user.Status}"));
     }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An error occurred while creating user: {Username}", request.Username);
+        return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.Error, ex.Message));
+    }
+}
+
 
     public Task<OperationObjectResult<UserDALResponse>> CreateUser(List<CreateUserHandlerRequest> request)
     {

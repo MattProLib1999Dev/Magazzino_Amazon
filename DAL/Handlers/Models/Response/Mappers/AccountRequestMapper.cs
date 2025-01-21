@@ -35,12 +35,12 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
             };
         }
 
-        public static OperationObjectResult<List<CreateUserHandlerRequest>> MapToCreateUserRequest(CreateUserModelRequest request)
+        public static OperationObjectResult<List<UserDALResponse>> MapToCreateUserRequest(CreateUserModelRequest request)
         {
-            // Creazione di una lista di richieste CreateUserHandlerRequest
-            var userDALResponseList = new List<CreateUserHandlerRequest>
+            // Creazione di una lista di UserDALResponse
+            var userDALResponseList = new List<UserDALResponse>
             {
-                new CreateUserHandlerRequest
+                new UserDALResponse
                 {
                     Name = request.Name,
                     Surname = request.Surname,
@@ -50,8 +50,9 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
             };
 
             // Restituisce un OperationObjectResult con stato Ok e la lista come valore
-            return OperationObjectResult<List<CreateUserHandlerRequest>>.CreateCorrectResponseGeneric(userDALResponseList);
+            return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponseGeneric(userDALResponseList);
         }
+
 
 
 

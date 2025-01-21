@@ -93,5 +93,10 @@ namespace Amazon.AccessTokenComponent
 
 
         }
+
+        public Task<OperationObjectResult<List<AccessTokenEncriptModel>>> GenerateToken(List<AccessTokenModel> input)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
