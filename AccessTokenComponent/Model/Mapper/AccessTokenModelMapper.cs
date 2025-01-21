@@ -4,7 +4,6 @@ using Amazon.Common;
 using Amazon.DAL.Handlers.Models.Response.Response;
 using Amazon.DAL.Models.Response;
 using Amazon.Models.Request;
-using Amazon.Models.Response;
 
 public static class AccessTokenModelMapper
 {
@@ -24,25 +23,26 @@ public static class AccessTokenModelMapper
         return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponseGeneric(userDALResponses);
     }
 
-    public static OperationObjectResult<AccessTokenModel> MapToAccessTokenModel(OperationObjectResult<UserHandlerResponse> response)
-{
-    // Controlla se la risposta ha esito positivo (Ok)
-    if (response.Status != OperationObjectResultStatus.Ok)
+    public static OperationObjectResult<List<AccessTokenModel>> MapToAccessTokenModel(OperationObjectResult<List<AccessTokenModel>> response)
     {
-        // Se la risposta non è Ok, restituisci un errore
-        return OperationObjectResult<AccessTokenModel>.CreateErrorResponse(response.Status, response.Message);
+        // Controlla se la risposta ha esito positivo (Ok)
+        if (response.Status != OperationObjectResultStatus.Ok)
+        {
+            // Se la risposta non è Ok, restituisci un errore
+            return OperationObjectResult<List<AccessTokenModel>>.CreateErrorResponse(response.Status, response.Message);
+        }
+
+            // Mappa la risposta da UserHandlerResponse a AccessTokenModel
+             var userDALResponse = response.Value.Select(accessToken => new AccessTokenModel
+            {
+                IdUser = accessToken.IdUser,
+                AccesstokemModel = accessToken.AccesstokemModel
+            }).ToList();
+
+        // Restituisci la risposta con l'AccessTokenModel mappato
+        return OperationObjectResult<List<AccessTokenModel>>.CreateCorrectResponseGeneric(userDALResponse);
     }
 
-    // Mappa la risposta da UserHandlerResponse a AccessTokenModel
-    var accessTokenModel = new AccessTokenModel
-    {
-        IdUser = response.Value.IdUser,
-        UserName = response.Value.Username
-    };
-
-    // Restituisci la risposta con l'AccessTokenModel mappato
-    return OperationObjectResult<AccessTokenModel>.CreateCorrectResponseGeneric(accessTokenModel);
-}
 
 
     public static OperationObjectResult<UserDALResponse> MapToAccessTokenModelSingleObj(OperationObjectResult<UserDALResponse> response)

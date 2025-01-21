@@ -5,8 +5,8 @@ namespace Amazon.AccessTokenComponent.Model.Abstract
 {
 	public interface IAccessTokenManager
 	{
-        public Task<OperationObjectResult<AccessTokenEncriptModel>> GenerateToken(AccessTokenModel user);
+        public Task<OperationObjectResult<AccessTokenEncriptModel>> GenerateToken(List<AccessTokenModel> user);
 
-        public Task<OperationObjectResult<AccessTokenModelRequest>> Validate(AccessTokenModelRequest accessTokenEncriptModel);
+        public Task<OperationObjectResult<AccessTokenModelRequest>> Validate(List<AccessTokenModelRequest> accessTokenEncriptModel);
 	}
 }

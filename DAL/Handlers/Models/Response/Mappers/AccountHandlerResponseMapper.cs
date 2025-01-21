@@ -3,6 +3,8 @@ using Amazon.Common;
 using Amazon.DAL.Models.Response;
 using Amazon.DAL.Handlers.Models.Response.Response;
 using Amazon.Models.Response;
+using Amazon.DoubleOptInComponent.Models.Request.Response;
+using System.Collections.Generic;
 
 namespace Amazon.DAL.Handlers.Models.Response.Mappers
 {
@@ -63,16 +65,22 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
             });
         }
 
-        public static UserDALResponse MapToUserDALResponse(Response.LoginHandlerResponse loginHandlerResponse)
+        public static OperationObjectResult<List<AccessTokenModel>> MapToUserDALResponse(OperationObjectResult<List<UserDALResponse>> loginHandlerResponse)
         {
-            return new UserDALResponse
+            if (loginHandlerResponse.Status != OperationObjectResultStatus.Ok)
             {
-                IdUser = loginHandlerResponse.IdUser,
-                Name = loginHandlerResponse.Name,
-                Surname = loginHandlerResponse.Surname,
-                Username = loginHandlerResponse.Username,
-                Password = loginHandlerResponse.Password ?? string.Empty
-            };
+                return OperationObjectResult<List<AccessTokenModel>>.CreateErrorResponse(loginHandlerResponse.Status, loginHandlerResponse.Message);
+            }
+
+            var result = new List<AccessTokenModel>();
+            loginHandlerResponse.Value.ForEach(x => result.Add(new AccessTokenModel
+            {
+                IdUser = x.IdUser,
+                UserName = x.Username,
+                AccesstokemModel = x.AccesstokenModel
+            }));
+
+            return OperationObjectResult<List<AccessTokenModel>>.CreateCorrectResponseGeneric(result);
         }
 
         public static AccessTokenModel MapToAccessTokenModel(UserHandlerResponse userHandlerResponse)
@@ -84,36 +92,74 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
             };
         }
 
-        public static OperationObjectResult<UserHandlerResponse> MapFromUserResponseForAccessToken(OperationObjectResult<UserDALResponse> response)
+        public static OperationObjectResult<List<AccessTokenModel>> MapFromUserResponseForAccessToken(OperationObjectResult<List<UserDALResponse>> response)
         {
             // Controlla se la risposta ha esito positivo (Ok)
             if (response.Status != OperationObjectResultStatus.Ok)
             {
                 // Se la risposta non è Ok, restituisci un errore
-                return OperationObjectResult<UserHandlerResponse>.CreateErrorResponse(response.Status, response.Message);
+                return OperationObjectResult<List<AccessTokenModel>>.CreateErrorResponse(response.Status, response.Message);
             }
 
             // Mappa la risposta da UserDALResponse a UserHandlerResponse
-            var userHandlerResponse = new UserHandlerResponse
+            var result = new List<AccessTokenModel>();
+            response.Value.ForEach(x => result.Add(new AccessTokenModel
             {
-                IdUser = response.Value.IdUser,
-                Name = response.Value.Name,
-                Surname = response.Value.Surname,
-                Username = response.Value.Username,
-                Password = response.Value.Password // Nota: gestire la password in modo sicuro è importante
-            };
+                IdUser = x.IdUser,
+                UserName = x.Username,
+                AccesstokemModel = x.AccesstokenModel,
 
-            // Restituisci un'OperationObjectResult con un oggetto UserHandlerResponse mappato
-            return OperationObjectResult<UserHandlerResponse>.CreateCorrectResponseGeneric(userHandlerResponse);
+            }));
+
+            return OperationObjectResult<List<AccessTokenModel>>.CreateCorrectResponseGeneric(result);
         }
 
-        public static OperationObjectResult<CreateUserHandlerResponse> MapFromCreateUsersHandlerResponse(OperationObjectResult<UserDALResponse> response)
+        public static  OperationObjectResult<List<UserDALResponse>> MapFromCreateUsersHandlerResponse(OperationObjectResult<List<UserDALResponse>> response)
         {
             if (response.Status != OperationObjectResultStatus.Ok)
-                return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(response.Status, response.Message);
-            return OperationObjectResult<CreateUserHandlerResponse>.CreateCorrectResponseGeneric(new CreateUserHandlerResponse());
+                return OperationObjectResult<List<UserDALResponse>>.CreateErrorResponse(response.Status, response.Message);
+            return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponseGeneric(new List<UserDALResponse>());
         }
 
+        public static OperationObjectResult<List<UserDALResponse>> MapFromDoubleOptInResponse(OperationObjectResult<List<DoubleOptInModelResponse>> doubleOptInTokenResult)
+{
+    // Verifica che lo stato dell'operazione sia Ok
+    if (doubleOptInTokenResult.Status != OperationObjectResultStatus.Ok)
+    {
+        // Se c'è un errore, restituiamo un errore per il mapping
+        return OperationObjectResult<List<UserDALResponse>>.CreateErrorResponse(
+            doubleOptInTokenResult.Status,
+            doubleOptInTokenResult.Message
+        );
+    }
+
+    // Mappiamo ogni elemento della lista in un UserDALResponse
+    var userDALResponses = doubleOptInTokenResult.Value.Select(doubleOptInModel => new UserDALResponse
+    {
+        AccesstokenModel = doubleOptInModel.AccesstokenModel,
+        AccountSecuritySalt = doubleOptInModel.AccountSecuritySalt,
+        IdUser = doubleOptInModel.IdUser,
+        Name = doubleOptInModel.Name,
+        Surname = doubleOptInModel.Surname,
+        Password = doubleOptInModel.Password
+    }).ToList();
+
+    // Restituiamo il risultato con la lista mappata
+    return OperationObjectResult<List<UserDALResponse>>.CreateCorrectResponseGeneric(userDALResponses);
+}
+
+
+
+        private static OperationObjectResultStatus MapUserStatusToOperationObjectResultStatus(UserStatus userStatus)
+        {
+            return userStatus switch
+            {
+                UserStatus.Ok => OperationObjectResultStatus.Ok,
+                UserStatus.Error => OperationObjectResultStatus.Error,
+                UserStatus.TemporaryRedirect => OperationObjectResultStatus.TemporaryRedirect,
+                UserStatus.NotFound => OperationObjectResultStatus.NotFound,
+            };
+        }
 
 
     }

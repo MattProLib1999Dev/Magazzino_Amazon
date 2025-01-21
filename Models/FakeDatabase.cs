@@ -41,19 +41,20 @@ public class FakeDatabase : IAccountDataSource
         user.OriginalPassword = user.Password;
         user.PasswordSecuritySalt = passwordHasher.GenerateSalt();
         user.Password = passwordHasher.HeshPassword(user.Password, user.PasswordSecuritySalt);
+        user.AccountSecuritySalt = Guid.NewGuid().ToString("N");
     }
 
     public void AddFakeUsers()
     {
-        AddUsersInternal(new UserDALResponse { Name = "Name1", Surname = "Surnmame1", Username = "matt1", Password = "pass1" });
-        AddUsersInternal(new UserDALResponse { Name = "Name1", Surname = "Surnmame1", Username = "matt1", Password = "pass1" });
-        AddUsersInternal(new UserDALResponse { Name = "Name1", Surname = "Surnmame1", Username = "matt1", Password = "pass1" });
-        AddUsersInternal(new UserDALResponse { Name = "Name1", Surname = "Surnmame1", Username = "matt1", Password = "pass1" });
-        AddUsersInternal(new UserDALResponse { Name = "Name1", Surname = "Surnmame1", Username = "matt1", Password = "pass1" });
-        AddUsersInternal(new UserDALResponse { Name = "Name1", Surname = "Surnmame1", Username = "matt1", Password = "pass1" });
-        AddUsersInternal(new UserDALResponse { Name = "Name1", Surname = "Surnmame1", Username = "matt1", Password = "pass1" });
-        AddUsersInternal(new UserDALResponse { Name = "Name1", Surname = "Surnmame1", Username = "matt1", Password = "pass1" });
-        AddUsersInternal(new UserDALResponse { Name = "Name1", Surname = "Surnmame1", Username = "matt1", Password = "pass1" });
+        AddUsersInternal(new UserDALResponse { Name = "Name1", Surname = "Surnmame1", Username = "matt1", Password = "pass1", Status = UserStatus.Confirmed });
+        AddUsersInternal(new UserDALResponse { Name = "Name1", Surname = "Surnmame1", Username = "matt1", Password = "pass1", Status = UserStatus.Confirmed });
+        AddUsersInternal(new UserDALResponse { Name = "Name1", Surname = "Surnmame1", Username = "matt1", Password = "pass1", Status = UserStatus.Confirmed });
+        AddUsersInternal(new UserDALResponse { Name = "Name1", Surname = "Surnmame1", Username = "matt1", Password = "pass1", Status = UserStatus.Confirmed });
+        AddUsersInternal(new UserDALResponse { Name = "Name1", Surname = "Surnmame1", Username = "matt1", Password = "pass1", Status = UserStatus.Confirmed });
+        AddUsersInternal(new UserDALResponse { Name = "Name1", Surname = "Surnmame1", Username = "matt1", Password = "pass1", Status = UserStatus.Confirmed });
+        AddUsersInternal(new UserDALResponse { Name = "Name1", Surname = "Surnmame1", Username = "matt1", Password = "pass1", Status = UserStatus.Confirmed });
+        AddUsersInternal(new UserDALResponse { Name = "Name1", Surname = "Surnmame1", Username = "matt1", Password = "pass1", Status = UserStatus.Confirmed });
+        AddUsersInternal(new UserDALResponse { Name = "Name1", Surname = "Surnmame1", Username = "matt1", Password = "pass1", Status = UserStatus.Confirmed });
 
     }
 
@@ -94,7 +95,7 @@ public class FakeDatabase : IAccountDataSource
     try
     {
         // Usa string.Equals per confrontare le stringhe in modo case-insensitive
-        var user = Users.FirstOrDefault(x => string.Equals(x.Username, request.Username, StringComparison.InvariantCulture));
+        var user = Users.FirstOrDefault(x => x.isValid() && string.Equals(x.Username, request.Username, StringComparison.InvariantCulture));
         
         if (user == null)
         {
@@ -125,17 +126,44 @@ public class FakeDatabase : IAccountDataSource
     {
         try
         {
-            var alreadyExist = Users.Any(x => x.Username.Equals(request.Username, StringComparison.InvariantCultureIgnoreCase));
-            if (alreadyExist)
-                return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.Conflict, "User Already Exists"));
-                var response = new UserDALResponse { Name = request.Name, Surname = request.Surname, Username = request.Username, Password = request.Password};
+            var user = Users.FirstOrDefault(u => u.isValid() && u.Username.Equals(request.Username, StringComparison.InvariantCultureIgnoreCase));
+            if (user == null)
+            {
+                var response = new UserDALResponse
+                {
+                    Name = request.Name,
+                    Surname = request.Surname,
+                    Username = request.Username,
+                    Password = request.Password,
+                    Status = UserStatus.Created
+                };
+
                 AddUsersInternal(response);
                 return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(response));
+            }
+            else if (user.Status == UserStatus.Created)
+            {
+                user.AccountSecuritySalt = Guid.NewGuid().ToString("N");
+                return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.Conflict, "User Already Exists"));
+            }
+
+            // Handle other statuses or unexpected cases
+            return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.BadRequest, "Bad request User Status"));
         }
         catch (Exception ex)
         {
             logger.LogError(ex.Message);
             return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.Error));
         }
+    }
+
+    public Task<OperationObjectResult<List<UserDALResponse>>> Login(List<LoginHandlerRequest> request)
+    {
+        throw new NotImplementedException();
+    }
+
+    Task<OperationObjectResult<List<UserDALResponse>>> IAccountDataSource.CreateUser(CreateUserDALRequest request)
+    {
+        throw new NotImplementedException();
     }
 }

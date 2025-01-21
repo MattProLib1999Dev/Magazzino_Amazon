@@ -1,3 +1,6 @@
+using Amazon.DAL.Handlers.Models.Response.Response;
+using Amazon.DAL.Models.Response;
+
 namespace Amazon.Common
 {
     public enum OperationObjectResultStatus
@@ -6,7 +9,8 @@ namespace Amazon.Common
         BadRequest = StatusCodes.Status400BadRequest,
         NotFound = StatusCodes.Status404NotFound,
         Conflict = StatusCodes.Status409Conflict,
-        Error = StatusCodes.Status500InternalServerError
+        Error = StatusCodes.Status500InternalServerError,
+        TemporaryRedirect = StatusCodes.Status307TemporaryRedirect
     }
 
     public class OperationObjectResult<T>
@@ -19,14 +23,14 @@ namespace Amazon.Common
 
         // Metodo generico per risposte corrette
         public static OperationObjectResult<T> CreateCorrectResponseGeneric(T value)
-    {
-        return new OperationObjectResult<T>
         {
-            Status = OperationObjectResultStatus.Ok,
-            Value = value,
-            Message = string.Empty
-        };
-    }
+            return new OperationObjectResult<T>
+            {
+                Status = OperationObjectResultStatus.Ok,
+                Value = value,
+                Message = string.Empty
+            };
+        }
 
         // Metodo specifico per un singolo oggetto UserDALResponse
         public static OperationObjectResult<T> CreateCorrectResponseSingleObj(T value,string message)
