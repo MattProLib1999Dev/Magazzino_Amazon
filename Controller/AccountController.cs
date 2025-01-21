@@ -199,6 +199,7 @@ private IActionResult HandleResponseStatus(OperationObjectResult<UserInfoModelRe
     }
 
 
+    [HttpPost("Confirm")]
     public async Task<IActionResult> CreateUser([FromBody] ConfirmUserModelRequest request)
     {
         try
