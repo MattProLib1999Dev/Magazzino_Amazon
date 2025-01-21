@@ -69,6 +69,13 @@ namespace Amazon.DAL.Handlers.Models.Request
 			return OperationObjectResult<List<CreateUserHandlerResponse>>.CreateCorrectResponseGeneric(createUserHandlerResponses);
 		}
 
+		public static ConfirmUserHandlerRequest MapToConfirmUserRequest(ConfirmUserModelRequest request)
+        {
+            return new ConfirmUserHandlerRequest
+            {
+                DoubleOptInToken = request.DoubleOptInToken
+            };
+        }
 
 
 

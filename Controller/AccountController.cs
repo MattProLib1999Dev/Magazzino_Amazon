@@ -199,6 +199,26 @@ private IActionResult HandleResponseStatus(OperationObjectResult<UserInfoModelRe
     }
 
 
+    public async Task<IActionResult> CreateUser([FromBody] ConfirmUserModelRequest request)
+    {
+        try
+        {
+            var mappedRequest = AccountHandlerRequestMapper.MapToConfirmUserRequest(request);
+            var confirmUserresponse = await _accountHandler.ConfirmUser(mappedRequest);
+            var response = AccountResponseMapper.MapFromConfirmUserHandlerResponse(confirmUserresponse);
+
+            if (response.Status == OperationObjectResultStatus.Ok)
+                return Ok();
+            return StatusCode((int) response.Status);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            return StatusCode(500);            
+        }
+    }
+
+
 
 
 

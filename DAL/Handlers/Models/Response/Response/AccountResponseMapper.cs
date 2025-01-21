@@ -69,5 +69,14 @@ namespace Amazon.DAL.Handlers.Models.Response.Response
             ));
             return OperationObjectResult<List<UserModelResponse>>.CreateCorrectResponseGeneric(result);
         }
+
+        public static OperationObjectResult<ConfirrmUserModelResponse> MapFromConfirmUserHandlerResponse(OperationObjectResult<ConfirmUserHandlerResponse> response)
+        {
+            if (response.Status != OperationObjectResultStatus.Ok)
+                return OperationObjectResult<ConfirrmUserModelResponse>.CreateErrorResponse(response.Status, response.Message);
+            return OperationObjectResult<ConfirrmUserModelResponse>.CreateCorrectResponseGeneric(
+                new ConfirrmUserModelResponse()
+            );
+        }
     }
 }

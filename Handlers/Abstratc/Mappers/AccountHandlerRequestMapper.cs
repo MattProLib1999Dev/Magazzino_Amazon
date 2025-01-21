@@ -38,6 +38,14 @@ namespace Amazon.Handlers.Abstratc.Mappers
             };
         }
 
+        public static ConfirmUserModelRequest MapToConfirmUserRequest(ConfirmUserModelRequest request)
+        {
+            return new ConfirmUserModelRequest
+            {
+                DoubleOptInToken = request.DoubleOptInToken
+            };
+        }
+
 
     }
 }
