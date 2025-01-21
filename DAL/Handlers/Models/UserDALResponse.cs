@@ -24,6 +24,11 @@ namespace Amazon.DAL.Models.Response
         {
             return Status == UserStatus.Confirmed;
         }
+
+        public bool NeedConfirm()
+        {
+            return Status == UserStatus.Created;
+        }
     }
 
 }

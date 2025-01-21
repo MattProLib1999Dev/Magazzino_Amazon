@@ -2,6 +2,7 @@ using Amazon.AccessTokenComponent.Model.Abstract;
 using Amazon.Appunti.Handlers.Abstract;
 using Amazon.Common;
 using Amazon.DAL.Handlers.Models.Request;
+using Amazon.DAL.Handlers.Models.Response;
 using Amazon.DAL.Handlers.Models.Response.Mappers;
 using Amazon.DAL.Handlers.Models.Response.Response;
 using Amazon.DAL.Models.Response;
@@ -130,7 +131,7 @@ namespace Amazon.Handlers.Abstract
                     return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(doubleOptInRequest.Status);
                 }
 
-                // Estrarre il primo elemento dalla lista
+                // Extract the first item from the list
                 var doubleOptInModel = doubleOptInRequest.Value;
                 if (doubleOptInModel == null)
                 {
@@ -171,6 +172,45 @@ namespace Amazon.Handlers.Abstract
         Task<OperationObjectResult<List<UserDALResponse>>> IAccountHandler.CreateUser(OperationObjectResult<List<UserDALResponse>> request)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<OperationObjectResult<ConfirmUserHandlerResponse>> ConfirmUser(ConfirmUserHandlerRequest request)
+        {
+            try
+            {
+                // Map the confirmation request
+                var mappedRequest = DoubleOptInRequestMapper.MatToDoubleOptInRequest(request);
+
+                // Verify the double opt-in token
+                var verifyResult = await _doubleOptInManager.VerifyDoubleOptInToken(mappedRequest);
+
+                // Check if verification was successful
+                if (verifyResult.Status != OperationObjectResultStatus.Ok)
+                {
+                    return OperationObjectResult<ConfirmUserHandlerResponse>.CreateErrorResponse(OperationObjectResultStatus.BadRequest);
+                }
+
+                // Map the verification result to a list of UserDALResponse
+                var dalRequest = verifyResult.Value.Select(optIn => new ConfirmCreateUserDALRequest
+                {
+                    IdUser = optIn.IdUser,
+                    Username = optIn.Username,
+                    // Map other properties here as necessary
+                }).ToList();
+
+
+                // Call to confirm the user
+                var result = await _accountDataSource.ConfirmUser(dalRequest);
+
+                // Map the confirmed user response
+                return AccountHandlerResponseMapper.MapUserResponseConfirmUser(result);
+            }
+            catch (Exception ex)
+            {
+                // Log errors and return error response with the message
+                _logger.LogError(ex, "Error during user confirmation process");
+                return OperationObjectResult<ConfirmUserHandlerResponse>.CreateErrorResponse(OperationObjectResultStatus.Ok, ex.Message);
+            }
         }
     }
 }

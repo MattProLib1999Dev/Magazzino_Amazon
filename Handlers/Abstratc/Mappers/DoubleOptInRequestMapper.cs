@@ -1,7 +1,9 @@
 using Amazon.Common;
+using Amazon.DAL.Handlers.Models.Request;
 using Amazon.DAL.Handlers.Models.Response.Response;
 using Amazon.DAL.Models.Response;
 using Amazon.DoubleOptInComponent.Models;
+using Amazon.DoubleOptInComponent.Models.Request;
 using Amazon.Models.Response;
 
 namespace Amazon.Handlers.Abstratc.Mappers
@@ -22,6 +24,14 @@ namespace Amazon.Handlers.Abstratc.Mappers
                     Username = firstResponse.Username,
                     DoubleOptInToken = firstResponse.DoubleOptInToken
                 });
+        }
+
+        public static DoubleOptInModelRequest MatToDoubleOptInRequest(ConfirmUserHandlerRequest request)
+        {
+            return new DoubleOptInModelRequest
+            {
+                DoubleOptInToken = request.DoubleOptInToken
+            };
         }
 
 

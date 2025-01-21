@@ -167,4 +167,16 @@ public class FakeDatabase : IAccountDataSource
     {
         throw new NotImplementedException();
     }
+
+    public Task<OperationObjectResult<UserDALResponse>> ConfirmUser(ConfirmCreateUserDALRequest request)
+    {
+        var user = Users.FirstOrDefault(u => u.NeedConfirm()
+            && u.Username.Equals(request.Username, StringComparison.InvariantCulture)
+            && u.IdUser == request.IdUser
+            && request.DoubleOptInToken.Equals(u.AccountSecuritySalt, StringComparison.InvariantCulture));
+        if (user == null)
+            return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateErrorResponse(OperationObjectResultStatus.NotFound));
+        user.Status = UserStatus.Confirmed;
+        return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(user));
+    }
 }

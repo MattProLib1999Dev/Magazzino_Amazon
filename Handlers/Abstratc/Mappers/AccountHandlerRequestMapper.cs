@@ -1,6 +1,7 @@
 using Amazon.Common;
 using Amazon.DAL.Handlers.Models.Request;
 using Amazon.DAL.Models.Response;
+using Amazon.DoubleOptInComponent.Models;
 using Amazon.Models.Request;
 using Microsoft.AspNetCore.Identity;
 
@@ -24,6 +25,16 @@ namespace Amazon.Handlers.Abstratc.Mappers
                 Surname = request.Surname,
                 Username = request.Username,
                 Password = request.Password
+            };
+        }
+
+        public static ConfirmCreateUserDALRequest MapToConfirmCreateUserDALRequest(DoubleOptInModel request)
+        {
+            return new ConfirmCreateUserDALRequest
+            {
+                DoubleOptInToken = request.DoubleOptInToken,
+                Username = request.Username,
+                IdUser = request.IdUser
             };
         }
 
