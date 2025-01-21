@@ -2,6 +2,7 @@ using Amazon.Appunti.Handlers.Abstract;
 using Amazon.Common;
 using Amazon.DAL.Handlers.Models;
 using Amazon.DAL.Handlers.Models.Request;
+using Amazon.DAL.Handlers.Models.Response;
 using Amazon.DAL.Handlers.Models.Response.Mappers;
 using Amazon.DAL.Handlers.Models.Response.Response;
 using Amazon.DAL.Models.Response;
@@ -222,6 +223,11 @@ public class AccountHandlers : IAccountHandler
     }
 
     Task<OperationObjectResult<List<UserDALResponse>>> IAccountHandler.CreateUser(OperationObjectResult<List<UserDALResponse>> request)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<OperationObjectResult<ConfirmUserHandlerResponse>> ConfirmUser(ConfirmUserHandlerRequest request)
     {
         throw new NotImplementedException();
     }

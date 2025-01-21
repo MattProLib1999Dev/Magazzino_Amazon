@@ -179,4 +179,9 @@ public class FakeDatabase : IAccountDataSource
         user.Status = UserStatus.Confirmed;
         return Task.FromResult(OperationObjectResult<UserDALResponse>.CreateCorrectResponseGeneric(user));
     }
+
+    public Task<OperationObjectResult<UserDALResponse>> ConfirmUser(List<ConfirmCreateUserDALRequest> request)
+    {
+        throw new NotImplementedException();
+    }
 }

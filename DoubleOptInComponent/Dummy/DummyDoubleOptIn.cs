@@ -1,6 +1,7 @@
 using Amazon.Common;
 using Amazon.DoubleOptInComponent.Abastract;
 using Amazon.DoubleOptInComponent.Models;
+using Amazon.DoubleOptInComponent.Models.Request;
 using Amazon.DoubleOptInComponent.Models.Request.Response;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Caching.Memory;
@@ -71,6 +72,9 @@ namespace Amazon.DoubleOptInComponent.Dummy
             return Task.FromResult(OperationObjectResult<List<DoubleOptInModelResponse>>.CreateErrorResponse(OperationObjectResultStatus.NotFound));
         }
 
-
+        public Task<OperationObjectResult<List<DoubleOptInModelResponse>>> VerifyDoubleOptInToken(DoubleOptInModelRequest user)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
