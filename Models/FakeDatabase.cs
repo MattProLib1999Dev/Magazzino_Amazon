@@ -5,6 +5,7 @@ using Amazon.DAL.Handlers.Models.Request;
 using Amazon.DAL.Handlers.PasswordHasher.Abstract;
 using Amazon.DAL.Models.Response;
 using Amazon.Models.Request;
+using Amazon.Models.Response;
 using Azure;
 public class FakeDatabase : IAccountDataSource
 {
@@ -157,12 +158,12 @@ public class FakeDatabase : IAccountDataSource
         }
     }
 
-    public Task<OperationObjectResult<List<UserDALResponse>>> Login(List<LoginHandlerRequest> request)
+    public Task<OperationObjectResult<UserDALResponse>> CreateUser(List<CreateUserHandlerRequest> request)
     {
         throw new NotImplementedException();
     }
 
-    Task<OperationObjectResult<List<UserDALResponse>>> IAccountDataSource.CreateUser(CreateUserDALRequest request)
+    public Task<OperationObjectResult<List<UserDALResponse>>> Login(List<LoginHandlerRequest> request)
     {
         throw new NotImplementedException();
     }

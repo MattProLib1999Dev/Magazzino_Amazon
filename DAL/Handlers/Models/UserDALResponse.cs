@@ -15,6 +15,8 @@ namespace Amazon.DAL.Models.Response
         public string AccountSecuritySalt { get; set; } = String.Empty;
         public string DoubleOptInToken { get; set; } = String.Empty;
         public string AccesstokenModel { get; set; } = String.Empty;
+        public string AccessToken { get; set; } = String.Empty;
+        public string RefreshToken { get; set; } = String.Empty;
 
         public UserStatus Status { get; set; }
 

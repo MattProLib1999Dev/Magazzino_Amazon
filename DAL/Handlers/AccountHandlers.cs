@@ -5,7 +5,10 @@ using Amazon.DAL.Handlers.Models.Request;
 using Amazon.DAL.Handlers.Models.Response.Mappers;
 using Amazon.DAL.Handlers.Models.Response.Response;
 using Amazon.DAL.Models.Response;
+using Amazon.DoubleOptInComponent.Abastract;
+using Amazon.Handlers.Abstract;
 using Amazon.Handlers.Abstratc;
+using Amazon.Handlers.Abstratc.Mappers;
 using Amazon.Models.Request;
 using Amazon.Models.Response;
 
@@ -15,14 +18,19 @@ public class AccountHandlers : IAccountHandler
     private readonly IAccountDataSource accountDataSource;
 
     public readonly IAccessTokenManager accessTokenManager;
+    private readonly IAccountDataSource _accountDataSource;
+    private readonly IDoubleOptInManager _doubleOptInManager;
+    private readonly ILogger<AccountHandler> _logger;
 
     public List<UserDALResponse> Users = new List<UserDALResponse>();
 
-    public AccountHandlers(IAccountDataSource inputAccountDataSource, ILogger<AccountHandlers> inputLogger, IAccessTokenManager _accessTokenManager)
+    public AccountHandlers(IAccountDataSource inputAccountDataSource, ILogger<AccountHandlers> inputLogger, IAccessTokenManager _accessTokenManager, IAccountDataSource accountDataSource, IDoubleOptInManager doubleOptInManager)
     {
         accountDataSource = inputAccountDataSource;
         logger = inputLogger;
         accessTokenManager = _accessTokenManager;
+        accountDataSource = _accountDataSource;
+        _doubleOptInManager = doubleOptInManager;
     }
 
     public async Task<OperationObjectResult<List<UserDALResponse>>> GetAllUsers()
@@ -104,7 +112,7 @@ public class AccountHandlers : IAccountHandler
     try
     {
         // Mappa la richiesta di login al formato del sistema
-        var mappedRequest = AccountHandlerRequestMapper.MapToLoginRequest(request);
+        var mappedRequest = Amazon.DAL.Handlers.Models.Request.AccountHandlerRequestMapper.MapToLoginRequest(request);
 
         // Esegui il login con l'accesso al data source
         var user = await accountDataSource.Login(mappedRequest);
@@ -156,33 +164,64 @@ public class AccountHandlers : IAccountHandler
     }
 }
 
-public async Task<OperationObjectResult<List<UserDALResponse>>> CreateUser(List<CreateUserHandlerRequest> request)
-{
-    try
-    {
-        // Mappa la richiesta di creazione utente
-        var mappedRequest = AccountHandlerRequestMapper.MapToCreateUserRequest(request);
+ public async Task<OperationObjectResult<CreateUserHandlerResponse>> CreateUser(OperationObjectResult<List<UserDALResponse>> request)
+        {
+            try
+            {
+                var mappedRequest = Amazon.DAL.Handlers.Models.Request.AccountHandlerRequestMapper.MapToCreateUserHandlerRequestList(request.Value);
 
-        // Esegui la creazione utente
-        var result = await accountDataSource.CreateUser(mappedRequest);
+                var result = await _accountDataSource.CreateUser(mappedRequest);
 
-        // Mappa la risposta e restituiscila
-        return AccountHandlerResponseMapper.MapFromCreateUsersHandlerResponse(result);
-    }
-    catch (Exception ex)
-    {
-        // Log dell'errore e restituzione di una risposta di errore
-        logger.LogError(ex, "An error occurred during the CreateUser operation.");
-        return OperationObjectResult<List<UserDALResponse>>.CreateErrorResponse(OperationObjectResultStatus.Error, ex.Message);
-    }
-}
+                var doubleOptInRequest = DoubleOptInRequestMapper.MapToDoubleInModel(result);
 
+                if (doubleOptInRequest?.Value == null || doubleOptInRequest.Status != OperationObjectResultStatus.Ok)
+                {
+                    return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(doubleOptInRequest.Status);
+                }
+
+                // Estrarre il primo elemento dalla lista
+                var doubleOptInModel = doubleOptInRequest.Value;
+                if (doubleOptInModel == null)
+                {
+                    return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(
+                        OperationObjectResultStatus.Error, "No Double Opt-In model found.");
+                }
+
+                var doubleOptInTokenResult = await _doubleOptInManager.GenerateDoubleOptInToken(doubleOptInModel);
+
+                if (doubleOptInTokenResult?.Value == null)
+                {
+                    return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(
+                        OperationObjectResultStatus.Error, "Failed to generate Double Opt-In token.");
+                }
+
+                var firstResponse = doubleOptInTokenResult.Value;
+                if (firstResponse == null)
+                {
+                    return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(
+                        OperationObjectResultStatus.Error, "No Double Opt-In model response found.");
+                }
+
+                var response = new CreateUserHandlerResponse
+                {
+                    IdUser = firstResponse.IdUser,
+                    Username = firstResponse.Username
+                };
+
+                return OperationObjectResult<CreateUserHandlerResponse>.CreateCorrectResponseGeneric(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during user creation process.");
+                return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(OperationObjectResultStatus.Error, ex.Message);
+            }
+        }
     Task<OperationObjectResult<LoginHandlerResponse>> IAccountHandler.Login(LoginHandlerRequest request)
     {
         throw new NotImplementedException();
     }
 
-    Task<OperationObjectResult<CreateUserHandlerResponse>> IAccountHandler.CreateUser(CreateUserHandlerRequest request)
+    Task<OperationObjectResult<List<UserDALResponse>>> IAccountHandler.CreateUser(OperationObjectResult<List<UserDALResponse>> request)
     {
         throw new NotImplementedException();
     }

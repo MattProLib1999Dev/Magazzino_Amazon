@@ -66,22 +66,28 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
         }
 
         public static OperationObjectResult<List<AccessTokenModel>> MapToUserDALResponse(OperationObjectResult<List<UserDALResponse>> loginHandlerResponse)
+{
+    if (loginHandlerResponse.Status != OperationObjectResultStatus.Ok)
+    {
+        return OperationObjectResult<List<AccessTokenModel>>.CreateErrorResponse(loginHandlerResponse.Status, loginHandlerResponse.Message);
+    }
+
+    var result = new List<AccessTokenModel>();
+
+    // Assuming loginHandlerResponse.Value is a List<UserDALResponse>
+    foreach (var user in loginHandlerResponse.Value)
+    {
+        result.Add(new AccessTokenModel
         {
-            if (loginHandlerResponse.Status != OperationObjectResultStatus.Ok)
-            {
-                return OperationObjectResult<List<AccessTokenModel>>.CreateErrorResponse(loginHandlerResponse.Status, loginHandlerResponse.Message);
-            }
+            IdUser = user.IdUser,
+            UserName = user.Username,
+            AccesstokemModel = user.AccesstokenModel // Ensure this property exists in UserDALResponse
+        });
+    }
 
-            var result = new List<AccessTokenModel>();
-            loginHandlerResponse.Value.ForEach(x => result.Add(new AccessTokenModel
-            {
-                IdUser = x.IdUser,
-                UserName = x.Username,
-                AccesstokemModel = x.AccesstokenModel
-            }));
+    return OperationObjectResult<List<AccessTokenModel>>.CreateCorrectResponseGeneric(result);
+}
 
-            return OperationObjectResult<List<AccessTokenModel>>.CreateCorrectResponseGeneric(result);
-        }
 
         public static AccessTokenModel MapToAccessTokenModel(UserHandlerResponse userHandlerResponse)
         {

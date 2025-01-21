@@ -1,5 +1,8 @@
 using Amazon.AccessTokenComponent.Model.Request;
 using Amazon.Common;
+using Amazon.DAL.Models.Response;
+using Amazon.Models;
+using Amazon.Models.Request;
 using Amazon.Models.Response;
 
 namespace Amazon.DAL.Handlers.Models.Response.Response
@@ -33,42 +36,38 @@ namespace Amazon.DAL.Handlers.Models.Response.Response
             return OperationObjectResult<UserInfoModelResponse>.CreateCorrectResponseGeneric(userInfoModelResponse);
         }
 
-        public static OperationObjectResult<TokenModelResponse> MapFromCreateUsersDALResponse(
-            OperationObjectResult<TokenHandlerResponse> response)
+        public static OperationObjectResult<TokenModelResponse> MapFromCreateUsersHandlerResponse(OperationObjectResult<List<UserDALResponse>> response)
         {
-            if (response == null)
-            {
-                throw new ArgumentNullException(nameof(response), "Il parametro response non può essere null.");
-            }
+            if (response.Status != OperationObjectResultStatus.Ok || response.Value == null || !response.Value.Any())
+                return OperationObjectResult<TokenModelResponse>.CreateErrorResponse(response.Status, response.Message);
 
-            // Gestione degli errori: Se lo stato non è OK, restituisce un errore
-            if (response.Status != OperationObjectResultStatus.Ok)
-            {
-                return OperationObjectResult<TokenModelResponse>.CreateErrorResponse(
-                    response.Status,
-                    response.Message ?? "Errore non specificato durante la creazione dell'utente."
-                );
-            }
+            var userDALResponse = response.Value.First();  // Assuming you want the first user
 
-            // Mappatura della risposta valida
-            if (response.Value == null)
+            return OperationObjectResult<TokenModelResponse>.CreateCorrectResponseGeneric(new TokenModelResponse
             {
-                return OperationObjectResult<TokenModelResponse>.CreateErrorResponse(
-                    OperationObjectResultStatus.Error,
-                    "La risposta contiene uno stato OK ma il valore è null."
-                );
-            }
-
-            // Creazione della risposta mappata
-            var mappedResponse = new TokenModelResponse
-            {
-                AccessToken = response.Value.AccessToken,
-                RefreshToken = response.Value.RefreshToken
-                // Aggiungi altre proprietà se necessario
-            };
-
-            return OperationObjectResult<TokenModelResponse>.CreateCorrectResponseGeneric(mappedResponse);
+                AccessToken = userDALResponse.AccessToken,
+                RefreshToken = userDALResponse.RefreshToken
+            });
         }
 
+
+        public static OperationObjectResult<List<UserModelResponse>> MapFromUsersHandler(OperationObjectResult<List<UserHandlerResponse>> users)
+        {
+            if (users.Status != OperationObjectResultStatus.Ok)
+                return OperationObjectResult<List<UserModelResponse>>.CreateErrorResponse(users.Status, users.Message);
+            var result = new List<UserModelResponse>();
+            users.Value.ForEach(u => result.Add(
+                new UserModelResponse
+                {
+                    IdUser = u.IdUser,
+                    Name = u.Name,
+                    Surname = u.Surname,
+                    Username = u.Username,
+                    Password = u.Password,
+                    Confirmed = u.Confirmed
+                }
+            ));
+            return OperationObjectResult<List<UserModelResponse>>.CreateCorrectResponseGeneric(result);
+        }
     }
 }

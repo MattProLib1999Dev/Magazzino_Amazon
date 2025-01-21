@@ -7,15 +7,9 @@ using Amazon.DAL.Handlers.Models.Response.Response;
 using Amazon.DAL.Models.Response;
 using Amazon.DoubleOptInComponent.Abastract;
 using Amazon.DoubleOptInComponent.Models;
-using Amazon.DoubleOptInComponent.Models.Request.Response;
 using Amazon.Handlers.Abstratc.Mappers;
 using Amazon.Models.Request;
 using Amazon.Models.Response;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AccountHandlerRequestMapper = Amazon.DAL.Handlers.Models.Request.AccountHandlerRequestMapper;
 
 namespace Amazon.Handlers.Abstract
@@ -81,7 +75,7 @@ namespace Amazon.Handlers.Abstract
         {
             try
             {
-                var mappedRequest = DAL.Handlers.Models.Request.AccountHandlerRequestMapper.MapToLoginRequest(request);
+                var mappedRequest = AccountHandlerRequestMapper.MapToLoginRequest(request);
                 var user = await _accountDataSource.Login(mappedRequest);
 
                 if (user.Status != OperationObjectResultStatus.Ok)
@@ -91,6 +85,13 @@ namespace Amazon.Handlers.Abstract
 
                 var userHandlerResponse = AccountHandlerResponseMapper.MapToUserDALResponse(user);
                 var requestAccessToken = AccessTokenModelMapper.MapToAccessTokenModel(userHandlerResponse);
+
+                if (requestAccessToken?.Value == null)
+                {
+                    return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(
+                        OperationObjectResultStatus.Error, "Failed to map AccessTokenModel.");
+                }
+
                 var result = await _accessTokenManager.GenerateToken(requestAccessToken.Value);
 
                 if (result.Status != OperationObjectResultStatus.Ok || result.Value == null)
@@ -99,12 +100,10 @@ namespace Amazon.Handlers.Abstract
                         OperationObjectResultStatus.Error, "Failed to generate access token.");
                 }
 
-                var firstToken = result.Value;
-
                 var response = new LoginHandlerResponse
                 {
-                    AccessToken = firstToken.Accesstoken,
-                    IdUser = firstToken.IdUser
+                    AccessToken = result.Value.Accesstoken,
+                    IdUser = result.Value.IdUser
                 };
 
                 return OperationObjectResult<LoginHandlerResponse>.CreateCorrectResponseGeneric(response);
@@ -116,90 +115,62 @@ namespace Amazon.Handlers.Abstract
             }
         }
 
-       public async Task<OperationObjectResult<CreateUserHandlerResponse>> CreateUser(OperationObjectResult<List<UserDALResponse>> request)
-{
-    try
-    {
-        // Mappiamo la richiesta
-        var mappedRequest = AccountHandlerRequestMapper.MapFromUsersDALResponse(request);
-
-        // Creiamo l'utente
-        var result = await _accountDataSource.CreateUser(mappedRequest);
-
-        var mappedResult = AccountHandlerResponseMapper.MapFromUsersDALResponse(result);
-
-        // Mappiamo la risposta dal datasource
-        var mappedResponse = AccountHandlerRequestMapper.MapFromUsersDALResponse(result);
-
-        // Gestione del Double Opt-In
-        var doubleOptInRequest = DoubleOptInRequestMapper.MapToDoubleInModel(mappedResponse);
-
-        // Se la risposta del Double Opt-In non è Ok, restituiamo un errore
-        if (doubleOptInRequest.Status != OperationObjectResultStatus.Ok)
+        public async Task<OperationObjectResult<CreateUserHandlerResponse>> CreateUser(OperationObjectResult<List<UserDALResponse>> request)
         {
-            return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(doubleOptInRequest.Status);
+            try
+            {
+                var mappedRequest = AccountHandlerRequestMapper.MapToCreateUserHandlerRequestList(request.Value);
+
+                var result = await _accountDataSource.CreateUser(mappedRequest);
+
+                var doubleOptInRequest = DoubleOptInRequestMapper.MapToDoubleInModel(result);
+
+                if (doubleOptInRequest?.Value == null || doubleOptInRequest.Status != OperationObjectResultStatus.Ok)
+                {
+                    return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(doubleOptInRequest.Status);
+                }
+
+                // Estrarre il primo elemento dalla lista
+                var doubleOptInModel = doubleOptInRequest.Value;
+                if (doubleOptInModel == null)
+                {
+                    return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(
+                        OperationObjectResultStatus.Error, "No Double Opt-In model found.");
+                }
+
+                var doubleOptInTokenResult = await _doubleOptInManager.GenerateDoubleOptInToken(doubleOptInModel);
+
+                if (doubleOptInTokenResult?.Value == null)
+                {
+                    return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(
+                        OperationObjectResultStatus.Error, "Failed to generate Double Opt-In token.");
+                }
+
+                var firstResponse = doubleOptInTokenResult.Value;
+                if (firstResponse == null)
+                {
+                    return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(
+                        OperationObjectResultStatus.Error, "No Double Opt-In model response found.");
+                }
+
+                var response = new CreateUserHandlerResponse
+                {
+                    IdUser = firstResponse.IdUser,
+                    Username = firstResponse.Username
+                };
+
+                return OperationObjectResult<CreateUserHandlerResponse>.CreateCorrectResponseGeneric(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during user creation process.");
+                return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(OperationObjectResultStatus.Error, ex.Message);
+            }
         }
 
-        // Avvolgi doubleOptInRequest.Value in un OperationObjectResult
-        var doubleOptInModelResult = new OperationObjectResult<DoubleOptInModel>
+        Task<OperationObjectResult<List<UserDALResponse>>> IAccountHandler.CreateUser(OperationObjectResult<List<UserDALResponse>> request)
         {
-            Status = OperationObjectResultStatus.Ok,
-            Value = doubleOptInRequest.Value,
-            Message = "Success"
-        };
-
-        // Se la generazione del token è avvenuta con successo, continua con la logica
-        var doubleOptInTokenResult = await _doubleOptInManager.GenerateDoubleOptInToken(doubleOptInModelResult);
-
-        // Verifica lo stato della risposta
-        if (doubleOptInTokenResult.Status != OperationObjectResultStatus.Ok || doubleOptInTokenResult.Value == null || !doubleOptInTokenResult.Value.Any())
-        {
-            return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(
-                OperationObjectResultStatus.Error, "Failed to generate Double Opt-In token.");
+            throw new NotImplementedException();
         }
-
-        // Se la lista non è vuota, estrai il primo oggetto dalla lista
-        var firstDoubleOptInModelResponse = doubleOptInTokenResult.Value.FirstOrDefault();
-
-        // Verifica se esiste almeno un oggetto nella lista
-        if (firstDoubleOptInModelResponse == null)
-        {
-            return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(
-                OperationObjectResultStatus.Error, "No Double Opt-In model response found.");
-        }
-
-        // Mappiamo il modello DoubleOptInModelResponse in un oggetto UserDALResponse
-        var userDALResponse = new UserDALResponse
-        {
-            IdUser = firstDoubleOptInModelResponse.IdUser,
-            Name = firstDoubleOptInModelResponse.Name,
-            Surname = firstDoubleOptInModelResponse.Surname,
-            Username = firstDoubleOptInModelResponse.Username,
-            Password = firstDoubleOptInModelResponse.Password,
-            AccountSecuritySalt = firstDoubleOptInModelResponse.AccountSecuritySalt,
-            AccesstokenModel = firstDoubleOptInModelResponse.AccesstokenModel
-        };
-
-        // Logica per la risposta finale
-        var response = new CreateUserHandlerResponse
-        {
-            IdUser = userDALResponse.IdUser,
-            Username = userDALResponse.Username
-        };
-
-        // Restituiamo la risposta con il risultato
-        return OperationObjectResult<CreateUserHandlerResponse>.CreateCorrectResponseGeneric(response);
-    }
-    catch (Exception ex)
-    {
-        // Gestione dell'errore con log dettagliato
-        _logger.LogError(ex, "Error during user creation process");
-
-        // Restituiamo un errore
-        return OperationObjectResult<CreateUserHandlerResponse>.CreateErrorResponse(OperationObjectResultStatus.Error, ex.Message);
-    }
-}
-
-      
     }
 }

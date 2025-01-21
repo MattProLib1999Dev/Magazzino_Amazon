@@ -13,6 +13,8 @@ namespace Amazon.Models
                 public string Username { get; set; } = String.Empty;
                 public string DoubleOptInToken { get; set; } = String.Empty;
 
+                public bool Confirmed { get; set; }
+
 
 	}
 }

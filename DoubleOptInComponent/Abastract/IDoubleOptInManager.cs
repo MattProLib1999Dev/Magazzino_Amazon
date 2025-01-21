@@ -6,7 +6,8 @@ namespace Amazon.DoubleOptInComponent.Abastract
 {
 	public interface IDoubleOptInManager
 	{
-        public Task<OperationObjectResult<List<DoubleOptInModelResponse>>> GenerateDoubleOptInToken(OperationObjectResult<DoubleOptInModel> user);
+        public Task<OperationObjectResult<DoubleOptInModelResponse>> GenerateDoubleOptInToken(DoubleOptInModel input);
+
         public Task<OperationObjectResult<List<DoubleOptInModelResponse>>> VerifyDoubleOptInToken(DoubleOptInModel user);
 	}
 }

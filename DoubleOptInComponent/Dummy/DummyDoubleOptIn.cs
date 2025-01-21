@@ -34,7 +34,7 @@ namespace Amazon.DoubleOptInComponent.Dummy
             ));
         }
 
-        public Task<OperationObjectResult<DoubleOptInModelResponse>> VerifyDoubleOptInToken(DoubleOptInModel user)
+        public Task<OperationObjectResult<List<DoubleOptInModelResponse>>> VerifyDoubleOptInToken(DoubleOptInModel user)
         {
             throw new NotImplementedException();
         }

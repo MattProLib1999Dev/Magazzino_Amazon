@@ -5,6 +5,7 @@ using Amazon.CustomComponents.Attributes;
 using Amazon.DAL.Handlers.Models.Request;
 using Amazon.DAL.Handlers.Models.Response.Mappers;
 using Amazon.DAL.Handlers.Models.Response.Response;
+using Amazon.Handlers.Abstract;
 using Amazon.Models;
 using Amazon.Models.Request;
 using Amazon.Models.Response;
@@ -137,28 +138,20 @@ public async Task<IActionResult> Login([FromBody] LoginHandlerRequest request)
 [HttpPost("Create")]
 public async Task<IActionResult> CreateUser([FromBody] CreateUserModelRequest request)
 {
-    try
-    {
-        if (request == null)
-        {
-            _logger.LogWarning("La richiesta è null.");
-            return BadRequest("La richiesta non può essere null.");
-        }
-
-        // Mappatura della richiesta
-        var mappedRequest = AccountRequestMapper.MapToCreateUserRequest(request);
-
-        // Chiamata all'handler per creare l'utente
-        var createUserHandlerResponse = await _accountHandler.CreateUser(mappedRequest);
-
-        // Gestione dello stato della risposta usando il metodo helper
-        return HandleResponseStatus(createUserHandlerResponse);
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Errore durante l'elaborazione della richiesta di creazione utente.");
-        return StatusCode(500, "Errore interno del server.");
-    }
+   try
+   {
+    var mappedRequest = AccountRequestMapper.MapToCreateUserRequest(request);
+    var CreateUserHandlerResponse = await _accountHandler.CreateUser(mappedRequest);
+    var response = AccountResponseMapper.MapFromCreateUsersHandlerResponse(CreateUserHandlerResponse);
+    if (response.Status == Common.OperationObjectResultStatus.Ok)
+        return Ok(response.Value);
+    return StatusCode((int)response.Status);
+   }
+   catch (Exception ex) 
+   {
+    _logger.LogError(ex.Message);
+    return StatusCode(500);
+   }
 }
 
 

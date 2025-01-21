@@ -1,7 +1,10 @@
+using Amazon.Common;
 using Amazon.DAL.Handlers.Models.Request;
+using Amazon.DAL.Models.Response;
 using Amazon.Models;
 using Amazon.Models.Request;
 using Amazon.Models.Response;
+using Microsoft.AspNetCore.Identity;
 
 namespace Amazon.DAL.Handlers.Models.Response.Mappers
 {
@@ -32,16 +35,26 @@ namespace Amazon.DAL.Handlers.Models.Response.Mappers
             };
         }
 
-        public static CreateUserHandlerRequest MapToCreateUserRequest(CreateUserModelRequest request)
+        public static OperationObjectResult<List<UserDALResponse>> MapToCreateUserRequest(CreateUserModelRequest request)
         {
-            return new CreateUserHandlerRequest
+            var userDALResponseList = new List<UserDALResponse>
             {
-                Name = request.Name,
-                Surname = request.Surname,
-                Username = request.Username,
-                Password = request.Password
+                new UserDALResponse
+                {
+                    Name = request.Name,
+                    Surname = request.Surname,
+                    Username = request.Username,
+                    Password = request.Password
+                }
+            };
+
+            return new OperationObjectResult<List<UserDALResponse>>
+            {
+                Status = OperationObjectResultStatus.Ok,
+                Value = userDALResponseList
             };
         }
+
 
         
 
