@@ -12,7 +12,7 @@ namespace Amazon.Appunti.Handlers.Abstract
   {
     public Task<OperationObjectResult<List<UserDALResponse>>> GetAllUsers();
     public Task<OperationObjectResult<List<UserDALResponse>>> UserInfo(UserInfoHandlerRequest request);
-    public Task<OperationObjectResult<LoginHandlerResponse>> Login(LoginHandlerRequest request);
+    public Task<OperationObjectResult<string>> Login(LoginHandlerRequest request);
     public Task<OperationObjectResult<ConfirmUserHandlerResponse>> ConfirmUser(ConfirmUserHandlerRequest request);
     public Task<OperationObjectResult<CreateUserHandlerResponse>> CreateUser(OperationObjectResult<List<UserDALResponse>> request);
 

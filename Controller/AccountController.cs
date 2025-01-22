@@ -86,59 +86,9 @@ public class AccountController : ControllerBase
     }
 
 
-
-
-[HttpPost("Login")]
-public async Task<IActionResult> Login([FromBody] LoginHandlerRequest request)
-{
-    try
-    {
-        // Validazione della richiesta
-        if (request == null)
-        {
-            _logger.LogWarning("Richiesta di login ricevuta è null.");
-            return BadRequest("La richiesta è null.");
-        }
-
-        // Mappatura della richiesta
-        var mappedRequest = AccountRequestMapper.MapToLoginRequest(request);
-        if (mappedRequest == null)
-        {
-            _logger.LogWarning("Errore durante la mappatura della richiesta di login.");
-            return BadRequest("Errore nella mappatura della richiesta.");
-        }
-
-        // Login tramite il gestore account
-        var loginResponse = await _accountHandler.Login(mappedRequest);
-        if (loginResponse == null)
-        {
-            _logger.LogError("Il gestore account ha restituito una risposta null.");
-            return StatusCode(500, "Errore nel gestore account.");
-        }
-
-        // Mappatura della risposta
-        var response = AccountResponseMapper.MapFromLoginHandlerResponse(loginResponse);
-        if (response == null)
-        {
-            _logger.LogError("Errore durante la mappatura della risposta del gestore account.");
-            return StatusCode(500, "Errore interno durante la mappatura della risposta.");
-        }
-
-        // Controllo dello stato della risposta
-        return HandleResponseStatus(response); 
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Errore imprevisto durante l'operazione di login.");
-        return StatusCode(500, "Errore interno del server.");
-    }
-}
-
-
 [HttpPost("login")]
 public async Task<IActionResult> Login([FromBody] LoginModelRequest request)
 {
-    // Validazione del parametro di input
     if (request == null || string.IsNullOrWhiteSpace(request.UserName) || string.IsNullOrWhiteSpace(request.Password))
     {
         _logger.LogWarning("Invalid login request: missing username or password.");
@@ -147,13 +97,9 @@ public async Task<IActionResult> Login([FromBody] LoginModelRequest request)
 
     try
     {
-        // Conversione a LoginHandlerRequest
         var handlerRequest = LoginModelRequest.From(request);
-
-        // Invocazione del gestore (AccountHandlers)
         var result = await _accountHandler.Login(handlerRequest);
 
-        // Gestione del risultato
         if (result.Status != OperationObjectResultStatus.Ok)
         {
             _logger.LogWarning("Login failed: {Status}, Message: {Message}", result.Status, result.Message);
@@ -166,9 +112,10 @@ public async Task<IActionResult> Login([FromBody] LoginModelRequest request)
     catch (Exception ex)
     {
         _logger.LogError(ex, "An unexpected error occurred during login for Username: {Username}", request.UserName);
-        return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
+        return Problem(detail: "An error occurred during login. Please try again later.", statusCode: StatusCodes.Status500InternalServerError);
     }
 }
+
 
 
 

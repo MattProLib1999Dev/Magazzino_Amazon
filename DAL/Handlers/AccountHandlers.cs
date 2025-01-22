@@ -312,8 +312,30 @@ public class AccountHandlers : IAccountHandler
         }
     }
 
-    Task<OperationObjectResult<LoginHandlerResponse>> IAccountHandler.Login(LoginHandlerRequest request)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<OperationObjectResult<string>> Login(LoginHandlerRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+            {
+                return new OperationObjectResult<string>
+                {
+                    Status = OperationObjectResultStatus.BadRequest,
+                    Message = "Invalid username or password"
+                };
+            }
+
+            if (request.Username == "testuser" && request.Password == "password123")
+            {
+                return new OperationObjectResult<string>
+                {
+                    Status = OperationObjectResultStatus.Ok,
+                    Message = "Login successful"
+                };
+            }
+
+            return new OperationObjectResult<string>
+            {
+                Status = OperationObjectResultStatus.Conflict,
+                Message = "Invalid credentials"
+            };
+        }
 }

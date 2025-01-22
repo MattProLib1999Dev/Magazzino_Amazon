@@ -16,7 +16,7 @@ namespace Amazon.Common
     public class OperationObjectResult<T>
     {
         public OperationObjectResultStatus Status { get; set; }
-        public required T Value { get; set; }
+        public T Value { get; set; }
         public string Message { get; set; } = string.Empty;
 
         public OperationObjectResult() { }

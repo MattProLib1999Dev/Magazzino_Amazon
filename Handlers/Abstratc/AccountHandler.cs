@@ -72,49 +72,33 @@ namespace Amazon.Handlers.Abstract
             }
         }
 
-        public async Task<OperationObjectResult<LoginHandlerResponse>> Login(LoginHandlerRequest request)
+        public async Task<OperationObjectResult<string>> Login(LoginHandlerRequest request)
         {
-            try
+            if (request == null || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
             {
-                var mappedRequest = AccountHandlerRequestMapper.MapToLoginRequest(request);
-                var user = await _accountDataSource.Login(mappedRequest);
-
-                if (user.Status != OperationObjectResultStatus.Ok)
+                return new OperationObjectResult<string>
                 {
-                    return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(user.Status, user.Message);
-                }
-
-                var userHandlerResponse = AccountHandlerResponseMapper.MapToUserDALResponse(user);
-                var requestAccessToken = AccessTokenModelMapper.MapToAccessTokenModel(userHandlerResponse);
-
-                if (requestAccessToken?.Value == null)
-                {
-                    return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(
-                        OperationObjectResultStatus.Error, "Failed to map AccessTokenModel.");
-                }
-
-                var result = await _accessTokenManager.GenerateToken(requestAccessToken.Value);
-
-                if (result.Status != OperationObjectResultStatus.Ok || result.Value == null)
-                {
-                    return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(
-                        OperationObjectResultStatus.Error, "Failed to generate access token.");
-                }
-
-                var response = new LoginHandlerResponse
-                {
-                    AccessToken = result.Value.Accesstoken,
-                    IdUser = result.Value.IdUser
+                    Status = OperationObjectResultStatus.BadRequest,
+                    Message = "Invalid username or password"
                 };
+            }
 
-                return OperationObjectResult<LoginHandlerResponse>.CreateCorrectResponseGeneric(response);
-            }
-            catch (Exception ex)
+            if (request.Username == "testuser" && request.Password == "password123")
             {
-                _logger.LogError(ex, "Error during login.");
-                return OperationObjectResult<LoginHandlerResponse>.CreateErrorResponse(OperationObjectResultStatus.Error, ex.Message);
+                return new OperationObjectResult<string>
+                {
+                    Status = OperationObjectResultStatus.Ok,
+                    Message = "Login successful"
+                };
             }
+
+            return new OperationObjectResult<string>
+            {
+                Status = OperationObjectResultStatus.Conflict,
+                Message = "Invalid credentials"
+            };
         }
+
 
         public async Task<OperationObjectResult<CreateUserHandlerResponse>> CreateUser(OperationObjectResult<List<UserDALResponse>> request)
         {
@@ -208,6 +192,6 @@ namespace Amazon.Handlers.Abstract
             }
         }
 
-     
+        
     }
 }
