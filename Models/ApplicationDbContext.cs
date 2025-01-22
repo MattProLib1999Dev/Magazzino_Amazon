@@ -11,11 +11,11 @@ public class ApplicationDbContext : DbContext
     {
     }
 
-    public DbSet<ProdottoDto> ListaDeiProdotti { get; set; }
+    public DbSet<ProdottoDtoInput> ListaDeiProdotti { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-    modelBuilder.Entity<ProdottoDto>().HasNoKey(); // Dichiarazione per entità senza chiave primaria
+    modelBuilder.Entity<ProdottoDtoInput>().HasKey(p => p.IdDelProdotto);
     }
 
 }

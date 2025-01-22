@@ -48,9 +48,9 @@ public class IProdottiRepository : IProdottoService
         return new ProdottoDto();
     }
 
-    public CreaProdottoDto CreaProdotto(CreaProdottoInputDto creaProdottoInputDto)
+    public CreaProdottoInputDto CreaProdotto(CreaProdottoInputDto creaProdottoInputDto)
     {
-        return new CreaProdottoDto();
+        return new CreaProdottoInputDto();
     }
 
     public UpdateProdottoDtoInput UpdateProdotto(int IdDelProdotto, UpdateProdottoDtoInput prodotto)
@@ -70,11 +70,6 @@ public class IProdottiRepository : IProdottoService
     public AddProdottoDtoInput addProdotto(int idDelProdotto, AddProdottoDtoInput addProdotto)
     {
         return new AddProdottoDtoInput();
-    }
-
-    public List<ProdottoDtoInput> getListProdotti()
-    {
-        return new List<ProdottoDtoInput>();
     }
     public List<ProdottoDtoInput> GetListProdotti()
     {
@@ -97,6 +92,16 @@ public class IProdottiRepository : IProdottoService
     }
 
     public ProdottoDtoInput GetProdotto(int numeroProdotto)
+    {
+        throw new NotImplementedException();
+    }
+
+    public int RestituiscimiLaQuantita()
+    {
+        throw new NotImplementedException();
+    }
+
+    public int ModificaLaQuantitàDeiProdotti(int quantita)
     {
         throw new NotImplementedException();
     }

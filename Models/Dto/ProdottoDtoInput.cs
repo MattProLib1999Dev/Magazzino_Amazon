@@ -28,6 +28,6 @@ public class ProdottoDtoInput
         set;
     } = String.Empty;
 
-    public int Prezzo { get; set; }
+    public float Prezzo { get; set; }
 
 }
