@@ -6,11 +6,11 @@ public interface IProdottoService
     ProdottoDtoInput GetProdotto(int numeroProdotto);
     bool CancellaUnProdotto();
     InviaUnProdottoDto InviaUnProdotto();
-    CreaProdottoDto CreaProdotto();
+    CreaProdottoDto CreaProdotto(CreaProdottoInputDto creaProdottoInputDto);
     UpdateProdottoDtoInput UpdateProdotto(int IdDelProdotto, UpdateProdottoDtoInput prodotto);
     AddProdottoDtoInput addProdotto(int idDelProdotto, AddProdottoDtoInput addProdotto);
     List<ProdottoDtoInput> GetListProdotti();
-    int RestituiscimiLaQuantita();
+    int RestituiscimiLaQuantita(List<ProdottoDtoInput> listProdottoDto);
     int ModificaLaQuantitàDeiProdotti();
     int InviaLaQuantitàDeiProdotti();
 
@@ -39,7 +39,7 @@ public class ProdottoService : IProdottoService
         return new ProdottoDto();
     }
 
-    public CreaProdottoDto CreaProdotto()
+    public CreaProdottoDto CreaProdotto(CreaProdottoInputDto creaProdottoInputDto)
     {
         return new CreaProdottoDto();
     }
@@ -85,9 +85,10 @@ public class ProdottoService : IProdottoService
     {
         throw new NotImplementedException();
     }
-    int IProdottoService.RestituiscimiLaQuantita()
+    
+    public int RestituiscimiLaQuantita(List<ProdottoDtoInput> listProdottoDto)
     {
-        throw new NotImplementedException();
+        return listProdottoDto.Count();
     }
 
     int IProdottoService.ModificaLaQuantitàDeiProdotti()
@@ -99,6 +100,8 @@ public class ProdottoService : IProdottoService
     {
         throw new NotImplementedException();
     }
+
+   
 
     /* public List<CreaProdottoInputDto> GetListaDeiProdotti()
     {

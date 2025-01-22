@@ -13,6 +13,7 @@ public class ProdottiController(IConfiguration configuration, IProdottiRepositor
     private readonly ILogger<ProdottiController>? inputLogger;
     private readonly ApplicationDbContext dbContext = new ApplicationDbContext();
     IConfiguration _configuration = configuration;
+    private ILogger<AccountHandlers> _logger;
     private readonly IProdottiRepository _Irepository = IProdottoRepository;
     private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
     private readonly FakeDatabase? database;
@@ -47,9 +48,11 @@ public class ProdottiController(IConfiguration configuration, IProdottiRepositor
 
     [EnableCors("AnotherPolicy")]
     [HttpPost("CreaUnProdotto")]
-    public IActionResult RestituiscimiLaListaDeiProdotti([FromQuery] string citta, [FromBody] CreaProdottoDto creaProdottoInputDto)
+public IActionResult RestituiscimiLaListaDeiProdotti([FromQuery] string citta, [FromBody] CreaProdottoDto creaProdottoInputDto)
+{
+    try
     {
-        var prodottoEntity = new CreaProdottoInputDto()
+        var prodottoEntity = new CreaProdottoInputDto
         {
             Citta = creaProdottoInputDto.Citta,
             Indirizzo = creaProdottoInputDto.Indirizzo,
@@ -58,11 +61,23 @@ public class ProdottiController(IConfiguration configuration, IProdottiRepositor
             Provenienza = creaProdottoInputDto.Provenienza
         };
 
-        IProdottoService.CreaProdotto();
-        dbContext.SaveChanges();
-        return Ok(IProdottoService.CreaProdotto() ?? throw new Exception("il prodotto non è stato creato"));
+        // Usa il servizio per creare il prodotto
+        var prodottoCreato = IProdottoService.CreaProdotto(prodottoEntity);
 
+        if (prodottoCreato == null)
+        {
+            return BadRequest("Il prodotto non è stato creato.");
+        }
+
+        return Ok(prodottoCreato);
     }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Errore durante la creazione del prodotto.");
+        return StatusCode(500, "Si è verificato un errore durante la creazione del prodotto.");
+    }
+}
+
 
     [EnableCors("AnotherPolicy")]
     [HttpPut("ModificaIlNomeDelProdotto/{idProdotto}")]
@@ -122,11 +137,11 @@ public class ProdottiController(IConfiguration configuration, IProdottiRepositor
 
     [EnableCors("AnotherPolicy")]
     [HttpGet("RestituiscimiLaQuantitàDeiProdotti")]
-    public ActionResult<int> ReStituiscimiLaQuantitàDeiProdotti([FromRoute] int quantita)
+    public ActionResult<int> ReStituiscimiLaQuantitàDeiProdotti(List<ProdottoDtoInput> listProdottoDto)
     {
         int quantitàDeiProdotti = 0;
         dbContext.SaveChanges();
-        IProdottoService.RestituiscimiLaQuantita();
+        IProdottoService.RestituiscimiLaQuantita(listProdottoDto);
         return Ok(quantitàDeiProdotti) ?? throw new Exception("la quantità dei prodotti è restituita correttamente");
     }
 

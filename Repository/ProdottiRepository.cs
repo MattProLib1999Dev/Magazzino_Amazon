@@ -48,7 +48,7 @@ public class IProdottiRepository : IProdottoService
         return new ProdottoDto();
     }
 
-    public CreaProdottoDto CreaProdotto()
+    public CreaProdottoDto CreaProdotto(CreaProdottoInputDto creaProdottoInputDto)
     {
         return new CreaProdottoDto();
     }
@@ -81,9 +81,9 @@ public class IProdottiRepository : IProdottoService
         return new List<ProdottoDtoInput>();
     }
 
-    public int RestituiscimiLaQuantita()
+    public int RestituiscimiLaQuantita(List<ProdottoDtoInput> listProdottoDto)
     {
-        throw new NotImplementedException();
+        return listProdottoDto.Count();
     }
 
     public int ModificaLaQuantitàDeiProdotti()
