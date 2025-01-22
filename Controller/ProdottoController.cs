@@ -1,6 +1,8 @@
-﻿using Amazon.DAL.Handlers.PasswordHasher.Abstract;
+﻿using System.Data;
+using Amazon.DAL.Handlers.PasswordHasher.Abstract;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Amazon;
 
@@ -13,38 +15,55 @@ public class ProdottiController(IConfiguration configuration, IProdottiRepositor
     private readonly ILogger<ProdottiController>? inputLogger;
     private readonly ApplicationDbContext dbContext = new ApplicationDbContext();
     IConfiguration _configuration = configuration;
-    private ILogger<AccountHandlers> _logger;
+    private ILogger<AccountHandlers>? _logger;
     private readonly IProdottiRepository _Irepository = IProdottoRepository;
     private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
     private readonly FakeDatabase? database;
+    private readonly DbContext? _dbContext;
 
     public record ProdottiControllerRecord(ILogger InputLogger, FakeDatabase Database)
     {
-        public ProdottiControllerRecord(ILogger inputLogger, ILogger<FakeDatabase> fakeDbLogger, IDevelopparePassworHasher passworHasher)
+        private readonly DbContext? _dbContext;
+
+        public ProdottiControllerRecord(ILogger inputLogger, ILogger<FakeDatabase> fakeDbLogger, IDevelopparePassworHasher passworHasher, DbContext dbContext)
             : this(inputLogger, new FakeDatabase(fakeDbLogger, passworHasher))
         {
+                this._dbContext = dbContext;
+
         }
     }
 
-
-    [EnableCors("AnotherPolicy")]
-    [HttpDelete("CancellaUnProdotto")]
-    public ActionResult<cancellaProdottoInputDto> CancellaUnProdotto([FromBody] cancellaProdottoInputDto cancellaProdotto, [FromRoute] int IdDelProdotto)
+[EnableCors("AnotherPolicy")]
+[HttpDelete("CancellaUnProdotto/{IdDelProdotto}")]
+public IActionResult CancellaUnProdotto([FromRoute] int IdDelProdotto)
+{
+    try
     {
+        // Usa il servizio per cancellare il prodotto
+        var prodottoCancellato = IProdottoService.CancellaUnProdotto(IdDelProdotto);
 
-        var cancellaProdottoInputDto = new cancellaProdottoInputDto()
+        // Se il prodotto non è stato trovato o cancellato, restituisci un errore
+        if (prodottoCancellato == null)
         {
-            Citta = cancellaProdotto.Citta,
-            Indirizzo = cancellaProdotto.Indirizzo,
-            Nome = cancellaProdotto.Nome,
-            Prezzo = cancellaProdotto.Prezzo,
-            Provenienza = cancellaProdotto.Provenienza
-        };
+            return NotFound("Prodotto non trovato.");
+        }
 
-        IProdottoService.CancellaUnProdotto();
-        dbContext.SaveChanges();
-        return Ok(IProdottoService.CancellaUnProdotto());
+        // Restituisci un messaggio di successo se il prodotto è stato cancellato correttamente
+        return Ok(new { message = "Prodotto cancellato con successo." });
     }
+    catch (Exception ex)
+    {
+        // Gestione degli errori in caso di problemi durante la cancellazione
+        _logger.LogError(ex, "Errore durante la cancellazione del prodotto.");
+        return StatusCode(500, "Si è verificato un errore durante la cancellazione del prodotto.");
+    }
+}
+
+
+
+
+
+
 
     [EnableCors("AnotherPolicy")]
     [HttpPost("CreaUnProdotto")]

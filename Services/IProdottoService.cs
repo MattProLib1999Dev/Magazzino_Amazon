@@ -4,7 +4,7 @@ public interface IProdottoService
 {
     List<AddProdottoDtoInput> GetProdotti();
     ProdottoDtoInput GetProdotto(int numeroProdotto);
-    bool CancellaUnProdotto();
+    bool CancellaUnProdotto(int idDelProdotto);
     InviaUnProdottoDto InviaUnProdotto();
     CreaProdottoDto CreaProdotto(CreaProdottoInputDto creaProdottoInputDto);
     UpdateProdottoDtoInput UpdateProdotto(int IdDelProdotto, UpdateProdottoDtoInput prodotto);
@@ -22,7 +22,7 @@ public class ProdottoService : IProdottoService
     {
         return new List<CreaProdottoInputDto>();
     }
-    public bool CancellaUnProdotto()
+    public bool CancellaUnProdotto(int idDelProdotto)
     {
         return true;
     }

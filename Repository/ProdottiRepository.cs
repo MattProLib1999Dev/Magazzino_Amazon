@@ -10,7 +10,7 @@ public class IProdottiRepository : IProdottoService
         _applicationDbContext = applicationDbContext;
     }
 
-    public bool CancellaUnProdotto()
+    public bool CancellaUnProdotto(int idDelProdotto)
     {
         return true;
     }
