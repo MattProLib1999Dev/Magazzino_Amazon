@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 AddLogging(builder.Logging, builder.Configuration);
 // Add services to the container.
 AddServices(builder.Services);
@@ -29,6 +30,15 @@ builder.Services.AddScoped<IProdottoService, ProdottoService>();
 builder.Services.AddScoped<IProdottiRepository>();
 builder.Services.AddScoped<IDatabase, FakeDatabase>();
 builder.Services.AddSingleton<FakeDatabase>();
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IProdottoService, ProdottoService>();
+
+// Il logging viene configurato automaticamente nella maggior parte delle applicazioni ASP.NET Core,
+// ma se non è configurato, aggiungilo:
+builder.Services.AddLogging();
+
 
 
 //amazan add cors 

@@ -105,5 +105,10 @@ public class IProdottiRepository : IProdottoService
     {
         throw new NotImplementedException();
     }
+
+    public object GetNumeroProdottiCreati()
+    {
+        throw new NotImplementedException();
+    }
 }
 
