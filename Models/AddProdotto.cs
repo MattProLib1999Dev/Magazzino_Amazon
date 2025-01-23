@@ -6,6 +6,10 @@ namespace Amazon;
 [Table("AddProdotto")]
 public class AddProdotto
 {
+    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [Column("Descrizione", Order = 1, TypeName = "Int")]
+    public int Id { get; set; }
+
     [Column("Descrizione",Order = 1, TypeName = "String")]
     [MaxLength(20)]
     public string Descrizione { get; set; } = String.Empty;

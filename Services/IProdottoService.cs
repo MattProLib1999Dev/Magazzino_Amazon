@@ -1,5 +1,6 @@
 ﻿using Amazon;
 using Amazon.Controllers;
+using Amazon.Prodotto;
 
 public interface IProdottoService
 {
@@ -77,71 +78,106 @@ public class ProdottoService : IProdottoService
     }
 
     private List<ProdottoDtoInput> GetProdottiMock()
-{
-    return new List<ProdottoDtoInput>
     {
-        new ProdottoDtoInput { IdDelProdotto = 1, Citta = "Roma", Nome = "Prodotto 1", Indirizzo = "via dell'Elcino 2", Provenienza = "Europa", Prezzo = 10 },
-        new ProdottoDtoInput { IdDelProdotto = 2, Citta = "Roma",Nome = "Prodotto 2",Indirizzo = "via dell'Elcino 2" ,Provenienza = "Europa", Prezzo = 15 },
-        new ProdottoDtoInput { IdDelProdotto = 3, Citta = "Roma", Indirizzo = "via dell'Elcino 2",Nome = "Prodotto 3",Provenienza = "Europa", Prezzo = 20 }
-    };
-}
+        return new List<ProdottoDtoInput>
+        {
+            new ProdottoDtoInput { IdDelProdotto = 1, Citta = "Roma", Nome = "Prodotto 1", Indirizzo = "via dell'Elcino 2", Provenienza = "Europa", Prezzo = 10 },
+            new ProdottoDtoInput { IdDelProdotto = 2, Citta = "Roma",Nome = "Prodotto 2",Indirizzo = "via dell'Elcino 2" ,Provenienza = "Europa", Prezzo = 15 },
+            new ProdottoDtoInput { IdDelProdotto = 3, Citta = "Roma", Indirizzo = "via dell'Elcino 2",Nome = "Prodotto 3",Provenienza = "Europa", Prezzo = 20 }
+        };
+    }
 
-    public List<ProdottoDtoInput> GetListProdotti()
+        public List<ProdottoDtoInput> GetListProdotti()
+        {
+            var prodotti = new List<ProdottoDtoInput>();
+
+            try
+            {
+                if (_dbContext == null)
+                {
+                    _logger.LogWarning("Il contesto del database è null. Restituisco dati simulati.");
+
+                    // Dati simulati nel caso in cui _dbContext sia null
+                    prodotti = GetProdottiMock().Select(p => MappaProdottoADto(p)).ToList();
+                    return prodotti;
+                }
+
+                if (_dbContext.ListaDeiProdotti == null)
+                {
+                    _logger.LogWarning("La tabella ListaDeiProdotti è null. Restituisco dati simulati.");
+
+                    // Dati simulati nel caso in cui ListaDeiProdotti sia null
+                    prodotti = GetProdottiMock().Select(p => MappaProdottoADto(p)).ToList();
+                    return prodotti;
+                }
+
+                // Recupero i prodotti dal database e mappo i risultati in ProdottoDtoInput
+                prodotti = _dbContext.ListaDeiProdotti
+                    .Select(p => MappaProdottoADto(p))
+                    .ToList();
+
+                // Se la tabella è vuota, popolala con dati simulati
+                if (prodotti == null || !prodotti.Any())
+                {
+                    _logger.LogInformation("La tabella ListaDeiProdotti è vuota. Aggiungo dati simulati.");
+                    prodotti = GetProdottiMock().Select(p => MappaProdottoADto(p)).ToList();
+
+                    // Salvo i dati simulati nel database per test futuri
+                    _dbContext.ListaDeiProdotti.AddRange((IEnumerable<Prodotto>)prodotti);
+                    _dbContext.SaveChanges();
+                }
+
+                _logger.LogInformation("Numero di prodotti trovati: {Count}", prodotti.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Errore durante il recupero della lista dei prodotti. Restituisco dati simulati.");
+
+                // Dati simulati in caso di eccezione
+                prodotti = GetProdottiMock().Select(p => MappaProdottoADto(p)).ToList();
+            }
+
+            return prodotti;
+
+        }
+
+
+    // Metodo di mappatura da Prodotto a ProdottoDtoInput
+    private ProdottoDtoInput MappaProdottoADto(ProdottoDtoInput prodotto)
     {
-        var prodotti = new List<ProdottoDtoInput>();
-
-        try
+        return new ProdottoDtoInput
         {
-            if (_dbContext == null)
-            {
-                _logger.LogWarning("Il contesto del database è null. Restituisco dati simulati.");
-                
-                // Dati simulati nel caso in cui _dbContext sia null
-                prodotti = GetProdottiMock();
-                return prodotti;
-            }
+            // Mappatura delle proprietà tra Prodotto e ProdottoDtoInput
+            IdDelProdotto = prodotto.IdDelProdotto,
+            Nome = prodotto.Nome,
+            Prezzo = prodotto.Prezzo
+            // Aggiungi altre proprietà se necessario
+        };
+    }
+        
 
-            if (_dbContext.ListaDeiProdotti == null)
-            {
-                _logger.LogWarning("La tabella ListaDeiProdotti è null. Restituisco dati simulati.");
-
-                // Dati simulati nel caso in cui ListaDeiProdotti sia null
-                prodotti = GetProdottiMock();
-                return prodotti;
-            }
-
-            // Recupero i prodotti dal database
-            prodotti = _dbContext.ListaDeiProdotti.ToList();
-
-            // Se la tabella è vuota, popolala con dati simulati
-            if (prodotti == null || !prodotti.Any())
-            {
-                _logger.LogInformation("La tabella ListaDeiProdotti è vuota. Aggiungo dati simulati.");
-                prodotti = GetProdottiMock();
-
-                // Salvo i dati simulati nel database per test futuri
-                _dbContext.ListaDeiProdotti.AddRange(prodotti);
-                _dbContext.SaveChanges();
-            }
-
-            _logger.LogInformation("Numero di prodotti trovati: {Count}", prodotti.Count);
-        }
-        catch (Exception ex)
+    // Metodo di mappatura da Prodotto a ProdottoDtoInput
+    private ProdottoDtoInput MappaProdottoADto(Prodotto prodotto)
+    {
+        return new ProdottoDtoInput
         {
-            _logger.LogError(ex, "Errore durante il recupero della lista dei prodotti. Restituisco dati simulati.");
-
-            // Dati simulati in caso di eccezione
-            prodotti = GetProdottiMock();
-        }
-
-        return prodotti;
+            IdDelProdotto = prodotto.Id,
+            Nome = prodotto.Nome,
+            Prezzo = prodotto.Prezzo
+        };
     }
 
 
-
-
-
-
+    // Metodo per ottenere i dati simulati (mock)
+    private List<Prodotto> GetProdottoMock()
+    {
+        return new List<Prodotto>
+        {
+            new Prodotto { Id = 1, Nome = "Prodotto 1", Prezzo = 10 },
+            new Prodotto { Id = 2, Nome = "Prodotto 2", Prezzo = 15 },
+            new Prodotto { Id = 3, Nome = "Prodotto 3", Prezzo = 7 }
+        };
+    }
     public List<AddProdottoDtoInput> GetProdotti()
     {
         throw new NotImplementedException();
@@ -177,9 +213,4 @@ public class ProdottoService : IProdottoService
     }
 
 
-
-    /* public List<CreaProdottoInputDto> GetListaDeiProdotti()
-    {
-        throw new 
-    } */
 }

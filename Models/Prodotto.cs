@@ -10,20 +10,22 @@ namespace Amazon.Prodotto
             
     }
 
-    [Column("Descrizione",Order = 1, TypeName = "String")]
+    [Key , DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
+
+    [ForeignKey("foreignKeyProdottoUserModelResponse")]
+    public int foreignKeyProdottoUserModelResponseId { get; set; }
+
     [MaxLength(20)]
     public string Descrizione { get; set; } = String.Empty;
     
 
-    [Column("Nome",Order = 1, TypeName = "String")]
     [MaxLength(20)]
     public string Nome { get; set; } = String.Empty;
 
-    [Column("Prezzo",Order = 1, TypeName = "Float")]
     [MaxLength(20)]
     public float Prezzo { get; set; }
 
-    [Column("Indirizzo",Order = 1, TypeName = "Indirizzo")]
     
     [MaxLength(20)]
     public string Indirizzo
@@ -32,7 +34,6 @@ namespace Amazon.Prodotto
         set;
     } = String.Empty;
 
-    [Column("Provenienza",Order = 1, TypeName = "String")]
     [MaxLength(20)]
     public string Provenienza
     {
@@ -40,7 +41,6 @@ namespace Amazon.Prodotto
         set;
     } = String.Empty;
 
-    [Column("Citta",Order = 1, TypeName = "String")]
     [MaxLength(20)]
     public string Citta
     {

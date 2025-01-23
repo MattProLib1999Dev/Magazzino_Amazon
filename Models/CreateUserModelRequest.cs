@@ -1,10 +1,14 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Amazon.Models.Request;
 
 namespace Amazon.Models
 {
 	public class CreateUserModelRequest
 	{
+
+        [Key , DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
         [Required]
         [MinLength(4, ErrorMessage = "Must be at least 4 chararcters")]
         public string Name { get; set; } = String.Empty;
