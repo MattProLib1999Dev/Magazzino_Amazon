@@ -48,26 +48,27 @@ builder.Services.AddCors(options => {
         policyBuilder.AllowAnyMethod();
     });
 });
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => 
-options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnections")));
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
-try 
+try
 {
     using (var serviceScope = app.Services.CreateScope())
     {
         var dbContext = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await dbContext.Database.MigrateAsync();
-        // or dbContext.Database.EnsureCreatedAsync();
+        //await dbContext.Database.MigrateAsync();
+        await dbContext.Database.EnsureCreatedAsync();
     }
-    
+
     // Middleware pipeline configuration
 
     app.Run();
-} 
-catch (Exception e) 
+}
+catch (Exception e)
 {
     app.Logger.LogCritical(e, "An exception occurred during the service startup");
 }

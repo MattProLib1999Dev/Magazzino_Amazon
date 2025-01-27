@@ -29,10 +29,9 @@ public class ApplicationDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         // Stringa di connessione al database SQL Server con nome utente e password
-        //optionsBuilder.UseSqlServer(@"Server=.\SQLEXPRESS;Database=DBAmazon;User Id=sqlUser;Password=password123;");
-        optionsBuilder.UseSqlServer(@"Server=localhost\SQLEXPRESS;Database=DBAmazon;User Id=sqlUser;Password=password123;");
+        optionsBuilder.UseSqlServer("Server=localhost;Database=AmazonDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True;encrypt=false;Integrated Security=True;");
 
-        
+
         // Crea il contesto del database per interagire con il database
         using (var context = new ApplicationDbContext())
         {
