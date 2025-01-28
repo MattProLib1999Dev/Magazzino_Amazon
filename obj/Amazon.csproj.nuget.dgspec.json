@@ -1,31 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Matt\\Desktop\\Amazon\\Magazzino_Amazon\\Amazon.csproj": {}
+    "C:\\Users\\matteo.proietti\\progetti\\Progetti personali e esercitazioni\\esercitazioni dotnet\\Amazon\\Amazon.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Matt\\Desktop\\Amazon\\Magazzino_Amazon\\Amazon.csproj": {
+    "C:\\Users\\matteo.proietti\\progetti\\Progetti personali e esercitazioni\\esercitazioni dotnet\\Amazon\\Amazon.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Matt\\Desktop\\Amazon\\Magazzino_Amazon\\Amazon.csproj",
+        "projectUniqueName": "C:\\Users\\matteo.proietti\\progetti\\Progetti personali e esercitazioni\\esercitazioni dotnet\\Amazon\\Amazon.csproj",
         "projectName": "Amazon",
-        "projectPath": "C:\\Users\\Matt\\Desktop\\Amazon\\Magazzino_Amazon\\Amazon.csproj",
-        "packagesPath": "C:\\Users\\Matt\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Matt\\Desktop\\Amazon\\Magazzino_Amazon\\obj\\",
+        "projectPath": "C:\\Users\\matteo.proietti\\progetti\\Progetti personali e esercitazioni\\esercitazioni dotnet\\Amazon\\Amazon.csproj",
+        "packagesPath": "C:\\Users\\matteo.proietti\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\matteo.proietti\\progetti\\Progetti personali e esercitazioni\\esercitazioni dotnet\\Amazon\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Matt\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\matteo.proietti\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -43,8 +37,7 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.100"
+        }
       },
       "frameworks": {
         "net8.0": {
@@ -120,7 +113,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.203/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
