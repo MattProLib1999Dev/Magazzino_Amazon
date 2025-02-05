@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Amazon.Models.Request;
+using MediatR;
 
 namespace Amazon.Models
 {
-	public class CreateUserModelRequest
+	public class CreateUserModelRequest : IRequest<int>
 	{
 
         [Key , DatabaseGenerated(DatabaseGeneratedOption.Identity)]

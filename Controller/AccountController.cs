@@ -85,7 +85,6 @@ public class AccountController : ControllerBase
         }
     }
 
-
 [HttpPost("login")]
 public async Task<IActionResult> Login([FromBody] LoginModelRequest request)
 {
@@ -115,11 +114,6 @@ public async Task<IActionResult> Login([FromBody] LoginModelRequest request)
         return Problem(detail: "An error occurred during login. Please try again later.", statusCode: StatusCodes.Status500InternalServerError);
     }
 }
-
-
-
-
-
 
 // Metodo helper per gestire lo stato della risposta
 private IActionResult HandleResponseStatus(OperationObjectResult<CreateUserHandlerResponse> response)
@@ -151,11 +145,6 @@ private IActionResult HandleResponseStatus(OperationObjectResult<UserInfoModelRe
     _logger.LogWarning($"Stato imprevisto della risposta: {response.Status}. Messaggio: {response.Message}");
     return StatusCode((int)response.Status, response.Message ?? "Stato non previsto.");
 }
-
-
-
-
-
     [HttpGet("Test")]
     [DeveloppareAuthorized]
     public IActionResult TestAuth()
@@ -184,14 +173,6 @@ private IActionResult HandleResponseStatus(OperationObjectResult<UserInfoModelRe
             return StatusCode(500);            
         }
     }
-
-
-
-
-
-
-    
-
     public class ErrorResponse
     {
         public string ErrorMessage { get; set; } = String.Empty;

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "EUDomRzSir0J64weBBfLxZ94b08Y318P42akOP4CPTFYd7SmvAllng16wcfA/NzlBJ00nvu/1iu/qJNn9Os8cQ==",
+  "dgSpecHash": "WVo/vzxzltI6FNfsSjU7N/HfIiR5pi85FFgom6dwwjB9ZqTqikbYTIHK0ncd0Xl0i+d9LIbtF6maoc+lFd9eng==",
   "success": true,
   "projectFilePath": "C:\\Users\\matteo.proietti\\progetti\\Progetti personali e esercitazioni\\esercitazioni dotnet\\Amazon\\Amazon.csproj",
   "expectedPackageFiles": [
@@ -56,6 +56,8 @@
     "C:\\Users\\matteo.proietti\\.nuget\\packages\\humanizer.core.zh-cn\\2.14.1\\humanizer.core.zh-cn.2.14.1.nupkg.sha512",
     "C:\\Users\\matteo.proietti\\.nuget\\packages\\humanizer.core.zh-hans\\2.14.1\\humanizer.core.zh-hans.2.14.1.nupkg.sha512",
     "C:\\Users\\matteo.proietti\\.nuget\\packages\\humanizer.core.zh-hant\\2.14.1\\humanizer.core.zh-hant.2.14.1.nupkg.sha512",
+    "C:\\Users\\matteo.proietti\\.nuget\\packages\\mediatr\\12.4.1\\mediatr.12.4.1.nupkg.sha512",
+    "C:\\Users\\matteo.proietti\\.nuget\\packages\\mediatr.contracts\\2.0.1\\mediatr.contracts.2.0.1.nupkg.sha512",
     "C:\\Users\\matteo.proietti\\.nuget\\packages\\microsoft.aspnetcore.antiforgery\\2.3.0\\microsoft.aspnetcore.antiforgery.2.3.0.nupkg.sha512",
     "C:\\Users\\matteo.proietti\\.nuget\\packages\\microsoft.aspnetcore.authentication.abstractions\\2.3.0\\microsoft.aspnetcore.authentication.abstractions.2.3.0.nupkg.sha512",
     "C:\\Users\\matteo.proietti\\.nuget\\packages\\microsoft.aspnetcore.authentication.core\\2.3.0\\microsoft.aspnetcore.authentication.core.2.3.0.nupkg.sha512",

@@ -52,6 +52,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+ 
 
 var app = builder.Build();
 
@@ -119,4 +120,7 @@ static void AddServices(IServiceCollection services)
     services.AddScoped<IAccessTokenManager, DummyAccessToken>();
     services.AddSingleton<IDevelopparePassworHasher, PBKDF2_PasswordHasher>();
     services.AddScoped<IDoubleOptInManager, DummyDoubleOptIn>();
+    services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+
 }

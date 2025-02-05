@@ -12,5 +12,7 @@ namespace Amazon.Models.Response
 		public string AccessToken { get; set; } = String.Empty;
 		public string RefreshToken { get; set; } = String.Empty;
 
+		public string Status { get; set; } = String.Empty;
+
 	}
 }
