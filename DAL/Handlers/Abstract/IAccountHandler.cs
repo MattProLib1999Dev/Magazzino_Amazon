@@ -11,6 +11,7 @@ namespace Amazon.Appunti.Handlers.Abstract
   public interface IAccountHandler
   {
     public Task<OperationObjectResult<List<UserDALResponse>>> GetAllUsers();
+    public Task<OperationObjectResult<UserDALResponse>> GetUser();
     public Task<OperationObjectResult<List<UserDALResponse>>> UserInfo(UserInfoHandlerRequest request);
     public Task<OperationObjectResult<string>> Login(LoginHandlerRequest request);
     public Task<OperationObjectResult<ConfirmUserHandlerResponse>> ConfirmUser(ConfirmUserHandlerRequest request);

@@ -5,10 +5,12 @@ using Amazon.CustomComponents.Attributes;
 using Amazon.DAL.Handlers.Models.Request;
 using Amazon.DAL.Handlers.Models.Response.Mappers;
 using Amazon.DAL.Handlers.Models.Response.Response;
+using Amazon.DAL.Models.Response;
 using Amazon.Handlers.Abstract;
 using Amazon.Models;
 using Amazon.Models.Request;
 using Amazon.Models.Response;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Amazon;
@@ -20,29 +22,27 @@ public class AccountController : ControllerBase
     private readonly ILogger<AccountController> _logger;
     private readonly IAccountHandler _accountHandler;
 
-    public AccountController(ILogger<AccountController> logger, IAccountHandler accountHandler)
+    private readonly IMediator _mediator;
+
+    public AccountController(ILogger<AccountController> logger, IAccountHandler accountHandler, IMediator mediator)
     {
         _logger = logger;
         _accountHandler = accountHandler;
+        _mediator = mediator;
     }
 
     [HttpGet("GetAllUsers")]
-    public async Task<IActionResult> GetAllUsers()
+    public async Task<UserDALResponse> GetAllUsers()
     {
-        try
-        {
-            var dalResult = await _accountHandler.GetAllUsers();
-            return Ok(dalResult);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Errore durante il recupero di tutti gli utenti.");
-            return StatusCode(500, new ErrorResponse
-            {
-                ErrorMessage = "An unexpected error occurred while retrieving users.",
-                ErrorCode = "INTERNAL_SERVER_ERROR"
-            });
-        }
+         var user = await _mediator.Send(new UserDALResponse());
+        return user;
+    }
+
+    [HttpGet("GetUser")]
+    public async Task<UserDALResponse?> GetUser(int idUser)
+    {
+        var user = await _mediator.Send(new UserDALResponse() { IdUser = idUser});
+        return user;
     }
 
     [HttpGet("UserInfo")]
@@ -155,23 +155,10 @@ private IActionResult HandleResponseStatus(OperationObjectResult<UserInfoModelRe
 
 
     [HttpPost("Confirm")]
-    public async Task<IActionResult> CreateUser([FromBody] ConfirmUserModelRequest request)
+    public async Task<UserDALResponse> CreateUser([FromBody] int userId)
     {
-        try
-        {
-            var mappedRequest = AccountHandlerRequestMapper.MapToConfirmUserRequest(request);
-            var confirmUserresponse = await _accountHandler.ConfirmUser(mappedRequest);
-            var response = AccountResponseMapper.MapFromConfirmUserHandlerResponse(confirmUserresponse);
-
-            if (response.Status == OperationObjectResultStatus.Ok)
-                return Ok();
-            return StatusCode((int) response.Status);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.Message);
-            return StatusCode(500);            
-        }
+        var customerDetails = await _mediator.Send(new UserDALResponse() { IdUser = userId});
+        return customerDetails;
     }
     public class ErrorResponse
     {
