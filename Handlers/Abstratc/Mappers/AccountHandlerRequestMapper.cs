@@ -23,7 +23,7 @@ namespace Amazon.Handlers.Abstratc.Mappers
             {
                 Name = request.Name,
                 Surname = request.Surname,
-                Username = request.Username,
+                Username = request.UserName,
                 Password = request.Password
             };
         }
