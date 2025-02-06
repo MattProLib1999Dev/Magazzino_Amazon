@@ -17,7 +17,7 @@ public class AccountHandlers : IAccountHandler
     private readonly IAccountDataSource _accountDataSource;
     private readonly IAccessTokenManager _accessTokenManager;
     private readonly IDoubleOptInManager _doubleOptInManager;
-
+    private readonly IDatabase database;
     private readonly List<UserDALResponse> users = new List<UserDALResponse>
     {
         new UserDALResponse
