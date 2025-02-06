@@ -192,6 +192,9 @@ namespace Amazon.Handlers.Abstract
             }
         }
 
-        
+        public Task<OperationObjectResult<UserDALResponse>> GetUser()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

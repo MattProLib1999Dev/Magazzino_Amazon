@@ -1,10 +1,8 @@
 using Amazon.Appunti.Handlers.Abstract;
 using Amazon.Common;
-using Amazon.DAL.Handlers.Models;
 using Amazon.DAL.Handlers.Models.Request;
 using Amazon.DAL.Handlers.Models.Response;
 using Amazon.DAL.Handlers.Models.Response.Mappers;
-using Amazon.DAL.Handlers.Models.Response.Response;
 using Amazon.DAL.Models.Response;
 using Amazon.DoubleOptInComponent.Abastract;
 using Amazon.Handlers.Abstratc;
@@ -19,8 +17,6 @@ public class AccountHandlers : IAccountHandler
     private readonly IAccountDataSource _accountDataSource;
     private readonly IAccessTokenManager _accessTokenManager;
     private readonly IDoubleOptInManager _doubleOptInManager;
-    private object _passwordHasher;
-    private readonly IDatabase database;
 
     private readonly List<UserDALResponse> users = new List<UserDALResponse>
     {
@@ -338,4 +334,9 @@ public class AccountHandlers : IAccountHandler
                 Message = "Invalid credentials"
             };
         }
+
+    public Task<OperationObjectResult<UserDALResponse>> GetUser()
+    {
+        throw new NotImplementedException();
+    }
 }
