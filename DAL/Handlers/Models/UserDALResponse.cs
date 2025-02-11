@@ -7,7 +7,7 @@ namespace Amazon.DAL.Models.Response
     public enum UserStatus { Created, Confirmed, Ok, Error, TemporaryRedirect, NotFound };
     public class UserDALResponse : IRequest<UserDALResponse>
     {
-        public int IdUser { get; set; }
+        public long IdUser { get; set; }
         public string Name { get; set; } = String.Empty;
         public string Surname { get; set; } = String.Empty;
         public string Username { get; set; } = String.Empty;
