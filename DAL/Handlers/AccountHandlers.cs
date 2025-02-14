@@ -1,3 +1,4 @@
+using Amazon.AccessTokenComponent.Model.Abstract;
 using Amazon.Appunti.Handlers.Abstract;
 using Amazon.Common;
 using Amazon.DAL.Handlers.Models.Request;
@@ -5,7 +6,6 @@ using Amazon.DAL.Handlers.Models.Response;
 using Amazon.DAL.Handlers.Models.Response.Mappers;
 using Amazon.DAL.Models.Response;
 using Amazon.DoubleOptInComponent.Abastract;
-using Amazon.Handlers.Abstratc;
 using Amazon.Handlers.Abstratc.Mappers;
 using Amazon.Models.Request;
 using Amazon.Models.Response;

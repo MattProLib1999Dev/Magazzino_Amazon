@@ -34,7 +34,7 @@ namespace Amazon.DAL.Handlers.Models.Request
 			{
 				Name = user.Name,
 				Surname = user.Surname,
-				Username = user.Username,
+				UserName = user.Username,
 				Password = user.Password // Assumendo che ci sia una proprietà Password, sostituisci se necessario
 			}).ToList();
 
